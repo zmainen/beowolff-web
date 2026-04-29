@@ -1,12 +1,12 @@
 ## Reading Map
 
-### How to use this guide
+### How to use this reader
 
-This guide exists so you can read the Beowolff-Embed program file (`platform/jobs/beowolff-embed.md`) and the attribution whitepaper ([Appendix A](#A)) and interrogate them rather than approve them on trust. Every ML concept those documents invoke — from contrastive losses to Shapley approximations to machine unlearning — is explained here at the depth needed to ask whether it was the right choice and what the alternatives would have been.
+This reader exists so you can read the Beowolff-Embed program file and the attribution whitepaper (available in the [Whitepapers](../whitepapers/) section) and interrogate them rather than approve them on trust. Every ML concept those documents invoke — from contrastive losses to Shapley approximations to machine unlearning — is explained here at the depth needed to ask whether it was the right choice and what the alternatives would have been.
 
-The guide is written for a computational neuroscientist who commands representation learning, Bayesian inference, RL, population coding, and behavioral statistics but has not built production ML systems. Where your existing intuitions provide a bridge, the guide names them explicitly: embedding geometry maps to population coding, contrastive learning maps to predictive coding, user-tower sequence models map to evidence accumulation, attribution maps to credit assignment. Where no bridge exists — production pipeline tooling, approximate nearest-neighbor search, model distillation attacks — the guide builds the concept from scratch.
+The reader is written for a computational neuroscientist who commands representation learning, Bayesian inference, RL, population coding, and behavioral statistics but has not built production ML systems. Where your existing intuitions provide a bridge, the guide names them explicitly: embedding geometry maps to population coding, contrastive learning maps to predictive coding, user-tower sequence models map to evidence accumulation, attribution maps to credit assignment. Where no bridge exists — production pipeline tooling, approximate nearest-neighbor search, model distillation attacks — the guide builds the concept from scratch.
 
-The structure follows the program file's logic, not a textbook's. [Chapters 2](#2)–[4](#4) lay foundations. [Chapters 5](#5)–[7](#7) cover the model architecture. [Chapter 8](#8) covers scaling. [Chapters 9](#9)–[11](#11) cover attribution, privacy, and operations. [Chapters 12](#12)–[13](#13) cover security and risk. Three appendices provide the source whitepapers and literature surveys.
+The structure follows the program file's logic, not a textbook's. [Chapters 2](#2)–[4](#4) lay foundations. [Chapters 5](#5)–[7](#7) cover the model architecture. [Chapter 8](#8) covers scaling. [Chapters 9](#9)–[11](#11) cover attribution, privacy, and operations. [Chapters 12](#12)–[13](#13) cover security and risk. The source whitepapers and literature surveys are in the [Whitepapers](../whitepapers/) section.
 
 Read linearly on first pass. After that, use the index below to jump from any term in the program file to its explanation.
 
@@ -81,15 +81,7 @@ Read linearly on first pass. After that, use the index below to jump from any te
 | Meaning function as political choice | [The meaning function is a political choice](#13/137-the-meaning-function-is-a-political-choice) |
 | Pinterest ItemSage | [CLIP](#5/clip-the-architecture-that-launched-multi-modal-learning), [Two-tower retrieval](#6/two-tower-retrieval-the-production-architecture) |
 | Spotify Discover Weekly | [The biography signal](#5/the-biography-signal-cold-start-through-language), [Collaborative filtering](#6/collaborative-filtering-users-who-agreed-will-agree-again) |
-| Ocean Protocol | [The layered attribution architecture](#9/the-layered-attribution-architecture), [Appendix B](#B) |
-
-### Appendices
-
-Three reference documents are included as appendices:
-
-- **[Appendix A: Attribution Whitepaper](#A)** — the original theoretical framework extending Shapley values to heterogeneous contribution types via the Filix provenance ledger. [Chapter 9](#9) revises this framework into a layered architecture.
-- **[Appendix B: Practical Value Attribution Systems](#B)** — survey of how music streaming, advertising, affiliate marketing, stock photography, and AI-generated content systems actually distribute value. The mechanisms that work are simpler than you'd expect.
-- **[Appendix C: Shapley Literature Survey](#C)** — academic literature on Data Shapley, influence functions, and data valuation for ML. Identifies where the Beowolff proposal extends existing work and where it enters novel territory.
+| Ocean Protocol | [The layered attribution architecture](#9/the-layered-attribution-architecture) |
 
 ### Dependency graph
 
@@ -108,7 +100,6 @@ Chapter 2 (Foundations)
 Chapters 10-13 are largely independent of each other
 and can be read in any order after Chapter 9.
 
-Appendices A-C are reference documents, not sequential reading.
 ```
 
 ### Gaps and assumptions
@@ -122,16 +113,16 @@ Places where the program file compresses reasoning that the guide expands:
 - **"Right-to-delete that actually propagates"** (program, implicit) invokes machine unlearning as if it is a solved problem. [Chapter 10](#10) is honest about what is and is not tractable.
 - **The program assumes millions of users with dense interaction histories.** [Chapter 13](#13) examines what happens if this assumption is false.
 
-### Adding to this guide
+### Adding to this reader
 
-New chapters or appendices follow this process:
+New chapters follow this process:
 
-1. **Write the chapter** as a markdown file in `chapters/` (or `chapters/appendices/` for reference documents). Use `##` for the chapter title, `###` for sections. LaTeX math via `$...$` (inline) and `$$...$$` (display).
+1. **Write the chapter** as a markdown file in `chapters/`. Use `##` for the chapter title, `###` for sections. LaTeX math via `$...$` (inline) and `$$...$$` (display).
 
-2. **Register it** in `index.html` by adding an entry to the `entries` array. Chapters get numeric keys (`'14'`, `'15'`, ...). Appendices get letter keys (`'D'`, `'E'`, ...).
+2. **Register it** in `index.html` by adding an entry to the `entries` array with a numeric key (`'14'`, `'15'`, ...).
 
 3. **Update this reading map.** Add relevant terms to the term index table with deep links: `[Section title](#key/heading-slug)`. The slug is the heading text, lowercased, punctuation removed, spaces replaced with hyphens.
 
 4. **Cross-reference from other chapters.** Link to chapters with `[Chapter N](#N)` syntax. Link to sections with `[text](#N/slug)`. The frontend intercepts all `#key` and `#key/slug` links automatically.
 
-Source whitepapers in `chapters/appendices/` are copies of the canonical documents at their original paths. To update an appendix, update the source and re-copy.
+Whitepapers and surveys go in the [Whitepapers](../whitepapers/) section, not here.

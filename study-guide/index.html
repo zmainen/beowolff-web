@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Study Guide — Beowolff</title>
+<title>Reader — Beowolff</title>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
@@ -185,8 +185,8 @@ main .chapter-nav a:hover { color: var(--sun); }
 <nav>
   <div class="nav-header">
     <a class="back" href="../">&larr; Beowolff</a>
-    <h1>Study Guide</h1>
-    <div class="subtitle">Foundation Embedding Program</div>
+    <h1>Reader</h1>
+    <div class="subtitle">Beowolff-Embed Program</div>
   </div>
   <div class="accent-bar"></div>
   <div class="nav-body" id="toc"></div>
@@ -216,10 +216,6 @@ const entries = [
   { file: 'chapters/11-production-ml.md',         title: 'Production ML Operations',            key: '11' },
   { file: 'chapters/12-threat-models.md',         title: 'Threat Models',                       key: '12' },
   { file: 'chapters/13-risks.md',                 title: 'Where the Proposal Could Be Wrong',   key: '13' },
-  { section: 'Appendices' },
-  { file: 'chapters/appendices/a-attribution-whitepaper.md',       title: 'Attribution Whitepaper',              key: 'A' },
-  { file: 'chapters/appendices/b-practical-systems-survey.md',     title: 'Practical Value Attribution Systems', key: 'B' },
-  { file: 'chapters/appendices/c-shapley-literature-survey.md',    title: 'Shapley Literature Survey',           key: 'C' },
 ];
 
 const chapters = entries.filter(e => e.file);
@@ -295,7 +291,7 @@ async function loadChapter(idx, scrollTo) {
 }
 
 async function printAll() {
-  let allHtml = '<h1 style="text-align:center; margin-bottom:2rem; font-family: var(--display);">Beowolff-Embed Study Guide</h1>';
+  let allHtml = '<h1 style="text-align:center; margin-bottom:2rem; font-family: var(--display);">Beowolff-Embed Reader</h1>';
   for (const ch of chapters) {
     try {
       const resp = await fetch(ch.file);
