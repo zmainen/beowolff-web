@@ -6,7 +6,7 @@ An artwork in a database is a row: an artist name, a date, a medium, a set of ta
 
 An embedding changes this. It turns every artwork into a point in a mathematical space. A Rembrandt self-portrait becomes a point. A Rothko color field becomes another point, somewhere else in the same space. The distance between them is a measure of similarity. Not binary (same or different) but continuous — a Rothko is this far from a Newman, that far from a Vermeer, some other distance from a Basquiat. The whole collection becomes a landscape you can navigate by proximity.
 
-The space has many dimensions — Beowolff-Embed uses 768. You cannot visualize 768 dimensions, but the principle is the same as two or three: points that are nearby are similar, points that are far apart are different. No single dimension corresponds to "redness" or "Impressionism" or "price tier." The meaning lives in the pattern across all dimensions at once, the way a chord's character lives in the combination of notes, not in any single one.
+The space has many dimensions — Rasa uses 768. You cannot visualize 768 dimensions, but the principle is the same as two or three: points that are nearby are similar, points that are far apart are different. No single dimension corresponds to "redness" or "Impressionism" or "price tier." The meaning lives in the pattern across all dimensions at once, the way a chord's character lives in the combination of notes, not in any single one.
 
 ### What "similar" means depends on how the model was trained
 
@@ -24,7 +24,7 @@ Are A and B similar? Art-historically, yes — both are canonical Abstract Expre
 
 What about from a market perspective? A and B trade in the same astronomical price tier. C does not. A model trained on sale prices would group A and B and separate C.
 
-None of these groupings is wrong. Each reflects a real dimension of similarity. The Beowolff-Embed system tries to capture all of them at once — visual, curatorial, behavioral, biographical, and market — in a single space. When it works, the space encodes a richer, more layered notion of "similar" than any single signal could. A collector browsing works near Rothko sees Newman (because they share art-historical context) but also sees that contemporary Chinese painter (because the visual kinship is real). The system does not collapse these into one dimension. It preserves them as different directions you can move in.
+None of these groupings is wrong. Each reflects a real dimension of similarity. The Rasa system tries to capture all of them at once — visual, curatorial, behavioral, biographical, and market — in a single space. When it works, the space encodes a richer, more layered notion of "similar" than any single signal could. A collector browsing works near Rothko sees Newman (because they share art-historical context) but also sees that contemporary Chinese painter (because the visual kinship is real). The system does not collapse these into one dimension. It preserves them as different directions you can move in.
 
 For the full technical treatment of embedding geometry, see [Reader Chapter 2](../../study-guide/#2).
 

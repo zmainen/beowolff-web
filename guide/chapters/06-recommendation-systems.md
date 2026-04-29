@@ -2,7 +2,7 @@
 
 ### Two traditions, one system
 
-Recommendation systems broadly fall into two camps, and the Beowolff system combines both.
+Recommendation systems broadly fall into two camps, and the Rasa system combines both.
 
 **Collaborative filtering** is the older tradition: people who agreed in the past will agree in the future. If Alice and Bob both collected works by Gerhard Richter and Anselm Kiefer, and Alice also collected Georg Baselitz, then Bob might want to see Baselitz too — even if Bob has never encountered Baselitz on the platform. The system does not need to know *why* Alice and Bob agree. It only needs to observe *that* they agree, and extrapolate.
 
@@ -22,7 +22,7 @@ Now consider art. A typical collector on Artsy browses a few dozen works per ses
 
 This is the cold-start problem, and in art it is not an edge case — it is the dominant case. The long tail of the art market — the 50,000 artists beyond the top 500 household names — is where a recommendation system could produce the most value (a genuine discovery, a sale that would not otherwise have happened). These are precisely the artists with the least behavioral data.
 
-The Beowolff architecture is designed specifically to handle this. The content signals from the item tower — image, metadata, biography, price — carry cold items into the right neighborhood of the embedding space even when no collector has ever interacted with them. Collaborative filtering takes over as behavioral data accumulates. The transition is smooth, not a hard switch, because both types of signal live in the same space.
+The Rasa architecture is designed specifically to handle this. The content signals from the item tower — image, metadata, biography, price — carry cold items into the right neighborhood of the embedding space even when no collector has ever interacted with them. Collaborative filtering takes over as behavioral data accumulates. The transition is smooth, not a hard switch, because both types of signal live in the same space.
 
 For the full technical treatment, including the mathematics of collaborative filtering and the evaluation methodology, see [Reader Chapter 6](../../study-guide/#6).
 
@@ -42,7 +42,7 @@ Here is what happens, concretely, when a collector opens the app and the system 
 
 The entire process takes under 200 milliseconds. The key architectural insight is that the item tower (the expensive, multi-modal computation) runs offline. It never runs at query time. What runs at query time is the user tower (one forward pass) and the nearest-neighbor search (one index lookup). This is why the system can be as complex as it needs to be in its understanding of each artwork without sacrificing response time.
 
-This architecture — called "two-tower retrieval" because it has one tower for items and one for users — is not novel to Beowolff. It is the standard architecture used by YouTube, Pinterest, Spotify, and Amazon. What is specific to Beowolff is the richness of the item tower (five signals instead of the typical two or three) and the focus on cold-start performance as the primary success metric.
+This architecture — called "two-tower retrieval" because it has one tower for items and one for users — is not novel to Rasa. It is the standard architecture used by YouTube, Pinterest, Spotify, and Amazon. What is specific to Rasa is the richness of the item tower (five signals instead of the typical two or three) and the focus on cold-start performance as the primary success metric.
 
 ### How success is measured
 
@@ -50,9 +50,9 @@ The system is evaluated by a deceptively simple question: of the works a collect
 
 This metric is called Recall@K — if K is 10, it asks: what fraction of the collector's actual interests appeared in the top 10 recommendations? The system never gets to peek at the test period during training; it must predict future behavior from past behavior. The evaluation uses a temporal split: train on everything before a cutoff date, predict what happens after.
 
-The critical evaluation design in Beowolff is **stratified measurement.** Warm-item performance (how well the system recommends works with lots of behavioral data) and cold-item performance (how well it recommends works with no behavioral data) are measured separately. A single aggregate metric can look impressive while hiding terrible cold-start performance, because warm items are easy and dominate the average.
+The critical evaluation design in Rasa is **stratified measurement.** Warm-item performance (how well the system recommends works with lots of behavioral data) and cold-item performance (how well it recommends works with no behavioral data) are measured separately. A single aggregate metric can look impressive while hiding terrible cold-start performance, because warm items are easy and dominate the average.
 
-The cold-start metric is what the Beowolff team calls "the differentiator." Any competent system can recommend popular works to active collectors — that is table stakes. The question that justifies the entire multi-modal architecture — the five signals, the entity tower, the biography component — is whether cold-start recall substantially exceeds what a simpler, image-only system achieves. The Phase 1 target is twice the cold-start recall of the existing baseline. If the system hits that target, the complexity has earned its keep. If it does not, the architecture needs rethinking.
+The cold-start metric is what the Rasa team calls "the differentiator." Any competent system can recommend popular works to active collectors — that is table stakes. The question that justifies the entire multi-modal architecture — the five signals, the entity tower, the biography component — is whether cold-start recall substantially exceeds what a simpler, image-only system achieves. The Phase 1 target is twice the cold-start recall of the existing baseline. If the system hits that target, the complexity has earned its keep. If it does not, the architecture needs rethinking.
 
 For the full technical treatment, including NDCG metrics and the evaluation methodology, see [Reader Chapter 6](../../study-guide/#6).
 

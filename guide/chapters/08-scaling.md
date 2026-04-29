@@ -2,7 +2,7 @@
 
 You have seen maps of the world that start as a blue-and-green marble and let you zoom in until you can read the name of a street cafe. Google Maps does not load every cafe sign at once. It loads what you are looking at, at the resolution you are looking at it, and swaps in more detail as you zoom.
 
-The Beowolff visualiser does the same thing, except the territory is not the earth. It is the space of aesthetic relationships between artworks. Every work in the collection has a position in this space, and that position is determined by what the model has learned about it -- its visual qualities, its curatorial context, its neighborhood of related works. The visualiser lets you see that space, pan across it, and zoom into any region to discover what the model thinks belongs together and why.
+The Rasa visualiser does the same thing, except the territory is not the earth. It is the space of aesthetic relationships between artworks. Every work in the collection has a position in this space, and that position is determined by what the model has learned about it -- its visual qualities, its curatorial context, its neighborhood of related works. The visualiser lets you see that space, pan across it, and zoom into any region to discover what the model thinks belongs together and why.
 
 This chapter explains how hundreds of thousands of artworks end up in your browser at once, what the layout means, and what you can learn from exploring it.
 

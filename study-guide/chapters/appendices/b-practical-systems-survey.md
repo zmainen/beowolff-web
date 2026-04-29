@@ -2,13 +2,13 @@
 
 *A survey of how platforms, marketplaces, and creative systems actually track and distribute value among contributors.*
 
-*Compiled April 2026 for the Beowolff art recommendation platform.*
+*Compiled April 2026 for the Rasa art recommendation program.*
 
 ---
 
 ## Why This Survey Exists
 
-Beowolff faces a value attribution problem with five distinct layers: property rights over original artworks, corpus-level contribution to recommendation models, recommendation-referral tracking, infrastructure contribution measurement, and (eventually) revenue-sharing for co-created works. A design conversation concluded that a unified Shapley framework is overengineered for this — each layer should use the simplest mechanism that captures causal contribution at its scale. This survey examines what real systems actually do, not what they claim to do, so we can learn from their engineering tradeoffs and institutional failures.
+Rasa faces a value attribution problem with five distinct layers: property rights over original artworks, corpus-level contribution to recommendation models, recommendation-referral tracking, infrastructure contribution measurement, and (eventually) revenue-sharing for co-created works. A design conversation concluded that a unified Shapley framework is overengineered for this — each layer should use the simplest mechanism that captures causal contribution at its scale. This survey examines what real systems actually do, not what they claim to do, so we can learn from their engineering tradeoffs and institutional failures.
 
 ---
 
@@ -34,7 +34,7 @@ Behind the streaming platforms sits a layered institutional apparatus. In the US
 
 The Mechanical Licensing Collective, established by the Music Modernization Act (2018), issues blanket mechanical licenses to streaming services, maintaining a public database for matching compositions to recordings. By October 2022, the MLC had paid nearly $700 million in royalties. It partnered with five companies (Blokur, Jaxsta, Pex, Salt, SX Works) to improve data matching, because the persistent operational problem is identification: connecting a stream event to the right composition, then to the right publisher and songwriter.
 
-**Beowolff lesson:** The music industry demonstrates that the hard problem is not computing shares — it's identification and matching. Knowing who contributed what to which outcome is the bottleneck, not the division algorithm. Invest in clean metadata and contribution graphs before worrying about the allocation formula.
+**Rasa lesson:** The music industry demonstrates that the hard problem is not computing shares — it's identification and matching. Knowing who contributed what to which outcome is the bottleneck, not the division algorithm. Invest in clean metadata and contribution graphs before worrying about the allocation formula.
 
 ---
 
@@ -66,7 +66,7 @@ The advertising industry's version of A/B testing for causal contribution is **i
 
 Incrementality testing is the gold standard because it establishes causality, but it's expensive: you're deliberately not showing your ad to a fraction of your audience. Most companies run incrementality tests periodically to calibrate their data-driven models, not as a continuous measurement system.
 
-**Beowolff lesson:** The advertising industry's trajectory — from simple heuristics through algorithmic attribution to causal experiments — maps directly onto our recommendation attribution layer. Start with last-touch referral tracking (which recommendation led to purchase), but plan for periodic A/B testing to measure whether the recommendation system is actually driving sales or just correlating with them. The data-driven attribution models are tempting but misleading without ground truth from experiments.
+**Rasa lesson:** The advertising industry's trajectory — from simple heuristics through algorithmic attribution to causal experiments — maps directly onto our recommendation attribution layer. Start with last-touch referral tracking (which recommendation led to purchase), but plan for periodic A/B testing to measure whether the recommendation system is actually driving sales or just correlating with them. The data-driven attribution models are tempting but misleading without ground truth from experiments.
 
 ---
 
@@ -86,7 +86,7 @@ Affiliate tracking works well for single-step attribution: one referrer, one pur
 
 The deeper problem is fraud: click injection, cookie stuffing, and manufactured referrals. Amazon's response has been aggressive program enforcement and rate cuts (commission rates have declined substantially since the program's early days), treating the affiliate channel as a cost center to be minimized rather than a partnership to be optimized.
 
-**Beowolff lesson:** For recommendation-to-purchase tracking, the affiliate model provides the right template: tag each recommendation interaction with a session/referral ID, apply a reasonable attribution window (probably longer than 24 hours for art purchases, which involve consideration), and credit the last recommendation touchpoint. This is layer 3 (recommendation referral tracking), and it should be simple — the complexity should live in layers 2 and 4.
+**Rasa lesson:** For recommendation-to-purchase tracking, the affiliate model provides the right template: tag each recommendation interaction with a session/referral ID, apply a reasonable attribution window (probably longer than 24 hours for art purchases, which involve consideration), and credit the last recommendation touchpoint. This is layer 3 (recommendation referral tracking), and it should be simple — the complexity should live in layers 2 and 4.
 
 ---
 
@@ -110,7 +110,7 @@ The system is plausible for measuring ecosystem-level importance (npm packages t
 
 SourceCred used a PageRank-like algorithm applied to contribution graphs (issues, pull requests, reviews, discussions) to assign "cred" scores to contributors. It was adopted by several DAOs and crypto projects but failed to achieve mainstream traction and has largely gone dormant. The core problem: any system that tries to reduce diverse contribution types (code, reviews, community management, documentation) to a single scalar is making implicit value judgments that will always feel arbitrary to someone.
 
-**Beowolff lesson:** For corpus-level contribution measurement (layer 2 — which training data shaped the model), the dependency-graph approach from tea.xyz is more relevant than the social-contribution approach from SourceCred. In Beowolff's case, "dependency" means: which training examples most influenced the recommendation model's neighborhood structure? This is measurable through leave-one-out or small-coalition Shapley on the training set, and it's a narrower, more tractable problem than general "contribution value."
+**Rasa lesson:** For corpus-level contribution measurement (layer 2 — which training data shaped the model), the dependency-graph approach from tea.xyz is more relevant than the social-contribution approach from SourceCred. In Rasa's case, "dependency" means: which training examples most influenced the recommendation model's neighborhood structure? This is measurable through leave-one-out or small-coalition Shapley on the training set, and it's a narrower, more tractable problem than general "contribution value."
 
 ---
 
@@ -130,7 +130,7 @@ YouTube's Content ID is the most sophisticated automated content-matching system
 
 The dispute process is asymmetric: users can dispute claims, but the copyright claimant makes the final decision unless the user takes legal action. Since 2016, disputed videos continue earning during the dispute period, with revenue held in escrow and released to the winner.
 
-**Beowolff lesson:** Content ID demonstrates that automated matching can work at enormous scale, but only with massive investment and a willingness to accept false positives (music industry groups dispute Google's 98% effectiveness claim). For Beowolff, the analogous system is provenance tracking for artworks — ensuring that when art sells, the attribution chain to the original creator is unambiguous. This is layer 1 (property rights/contract) and should be the simplest, most reliable layer in the system.
+**Rasa lesson:** Content ID demonstrates that automated matching can work at enormous scale, but only with massive investment and a willingness to accept false positives (music industry groups dispute Google's 98% effectiveness claim). For Rasa, the analogous system is provenance tracking for artworks — ensuring that when art sells, the attribution chain to the original creator is unambiguous. This is layer 1 (property rights/contract) and should be the simplest, most reliable layer in the system.
 
 ---
 
@@ -146,13 +146,13 @@ Snowflake Marketplace allows organizations to share and access "live, query-read
 
 Ocean Protocol attempted something more ambitious: a decentralized data marketplace with "compute-to-data" — the idea that you can run computations against someone's data without the data leaving the provider's infrastructure, enabling attribution at the query level. The OCEAN token was meant to create a market for data services. In practice, adoption has been minimal. The protocol is used primarily within the crypto-native community for prediction market data ("Predictoor" and "Data Farming" programs), not for the enterprise data marketplaces originally envisioned. The gap between the whitepaper vision (transparent, fair data markets) and the operational reality (niche DeFi tooling) is instructive.
 
-**Beowolff lesson:** Data marketplaces fail when they try to track downstream value at fine granularity. The operational overhead exceeds the value of precise attribution. Snowflake's approach — coarse pricing, no downstream tracking — works because it's simple. For Beowolff's training data attribution (layer 2), this means: measure contribution at training time (what did each data source contribute to model quality?), not at inference time (which training example influenced this specific recommendation?). The former is tractable; the latter is computationally intractable and operationally unnecessary.
+**Rasa lesson:** Data marketplaces fail when they try to track downstream value at fine granularity. The operational overhead exceeds the value of precise attribution. Snowflake's approach — coarse pricing, no downstream tracking — works because it's simple. For Rasa's training data attribution (layer 2), this means: measure contribution at training time (what did each data source contribute to model quality?), not at inference time (which training example influenced this specific recommendation?). The former is tractable; the latter is computationally intractable and operationally unnecessary.
 
 ---
 
 ## 7. AI-Generated Content Attribution: The Legal and Technical Frontier
 
-The AI-generated content space is where attribution is most contested and least resolved, making it the most instructive for Beowolff's eventual generative features.
+The AI-generated content space is where attribution is most contested and least resolved, making it the most instructive for Rasa's eventual generative features.
 
 ### The Current State: No Attribution
 
@@ -174,7 +174,7 @@ Adobe is the notable outlier. Firefly was trained primarily on Adobe Stock image
 
 The Content Authenticity Initiative (CAI), founded by Adobe, the New York Times, and Twitter in 2019, developed the C2PA standard for embedding provenance metadata in digital content. Content Credentials encode the publisher, device, location, time, and editing history of a file, secured with cryptographic signatures. The standard has over 6,000 member organizations. However, C2PA tracks provenance (who created/edited this file), not contribution (who deserves credit for the training data that made generation possible). It also faces adoption problems — critics note that metadata can be stripped, signers don't necessarily verify accuracy, and as of 2025 real-world usage remains minimal.
 
-**Beowolff lesson:** The AI attribution landscape demonstrates two things. First, the absence of attribution is not a stable equilibrium — the lawsuits and regulatory pressure will force some resolution. Second, the consent-based approach (Fairly Trained, Spawning) is architecturally simpler and legally cleaner than the computation-based approach (trying to compute each training example's contribution to each output). Beowolff should build consent and licensing into the platform from the start, using the recommendation model's contribution analysis (layer 2) as a supplementary signal for fair compensation rather than the primary legal basis for it.
+**Rasa lesson:** The AI attribution landscape demonstrates two things. First, the absence of attribution is not a stable equilibrium — the lawsuits and regulatory pressure will force some resolution. Second, the consent-based approach (Fairly Trained, Spawning) is architecturally simpler and legally cleaner than the computation-based approach (trying to compute each training example's contribution to each output). Rasa should build consent and licensing into the platform from the start, using the recommendation model's contribution analysis (layer 2) as a supplementary signal for fair compensation rather than the primary legal basis for it.
 
 ---
 
@@ -196,7 +196,7 @@ The music industry's biggest problem isn't the royalty formula — it's matching
 
 No successful system uses a single attribution mechanism for all contribution types. Music royalties separate mechanical from performance from synchronization rights, each with different collection societies and rates. Advertising separates impression attribution (data-driven models) from causal measurement (incrementality tests). Stock photography separates the license transaction (simple percentage) from the discovery mechanism (algorithmic ranking with no explicit revenue sharing).
 
-This validates Beowolff's layered approach: property rights for direct sales, corpus contribution analysis for training data, referral tracking for recommendations, A/B testing for infrastructure, and separate terms for generative/co-created works. Each layer uses the mechanism appropriate to its causal structure.
+This validates Rasa's layered approach: property rights for direct sales, corpus contribution analysis for training data, referral tracking for recommendations, A/B testing for infrastructure, and separate terms for generative/co-created works. Each layer uses the mechanism appropriate to its causal structure.
 
 ### Disputes are resolved institutionally, not computationally
 
@@ -204,13 +204,13 @@ Content ID doesn't compute the "right" answer — it flags matches and lets the 
 
 ### The consent layer is foundational
 
-Adobe's approach (train on licensed data, compensate contributors) is legally defensible in a way that Stability AI's approach (train on everything, litigate later) is not. For Beowolff, this means the first layer — clear property rights and artist consent — is not just legally necessary but architecturally foundational. Everything else (recommendation attribution, corpus contribution, infrastructure measurement) sits on top of a clear consent and licensing agreement with every contributing artist.
+Adobe's approach (train on licensed data, compensate contributors) is legally defensible in a way that Stability AI's approach (train on everything, litigate later) is not. For Rasa, this means the first layer — clear property rights and artist consent — is not just legally necessary but architecturally foundational. Everything else (recommendation attribution, corpus contribution, infrastructure measurement) sits on top of a clear consent and licensing agreement with every contributing artist.
 
 ---
 
 ## Summary Table: Mechanisms by Layer
 
-| Beowolff Layer | Analogous Systems | Mechanism | Precision | Complexity |
+| Rasa Layer | Analogous Systems | Mechanism | Precision | Complexity |
 |---|---|---|---|---|
 | 1. Property rights | Stock photography licensing, music mechanical rights | Contract + per-transaction royalty | Exact | Low |
 | 2. Corpus contribution | tea.xyz dependency graphs, (no good analogue) | Leave-one-out / small-coalition Shapley at training time | Approximate | Medium |

@@ -4,7 +4,7 @@
 
 You work in the art world. You are an artist, a gallerist, a collector, a curator, an art advisor. You have read about AI in art. You know that machine learning systems learn patterns from data, that recommendation algorithms power Spotify and Netflix, that "embeddings" and "neural networks" are real things and not just marketing language. But you have never trained a model, read a loss function, or written code.
 
-This guide is for you. It explains the Beowolff-Embed program — a recommendation system designed for the art market — in plain language, one piece at a time.
+This guide is for you. It explains the Rasa program — a recommendation system designed for the art market — in plain language, one piece at a time.
 
 ### What this guide does not do
 
@@ -14,7 +14,7 @@ If you want more technical depth on any topic, each chapter links to the corresp
 
 ### How the chapters work
 
-Each chapter covers one component of the Beowolff-Embed system. They are numbered to match the Reader, so you can move between the two documents without getting lost.
+Each chapter covers one component of the Rasa system. They are numbered to match the Reader, so you can move between the two documents without getting lost.
 
 Read them in order the first time. After that, use the table below to jump to whatever you need.
 

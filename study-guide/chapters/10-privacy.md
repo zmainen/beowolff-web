@@ -40,7 +40,7 @@ The result is a model trained on the union of all clients' data without that dat
 
 **Communication costs.** The practical challenge for federated learning is communication. Each round requires sending and receiving a full model's worth of parameters — or at least the deltas — to and from every participating client. For a ViT-L model with ~300M parameters, that is roughly 1.2 GB per client per round. With thousands of clients and hundreds of rounds, the bandwidth costs are substantial. Compression techniques (gradient quantisation, sparsification) help but do not eliminate the problem.
 
-**Why the program lists federated user tower as aspirational (Phase 5+).** The program's architecture has an item tower and a user tower. The item tower is trained on artwork data that Beowolff owns or licenses — there is no privacy motivation for federating it. The user tower is trained on user behavioural data, which is where the privacy concern concentrates. Federating the user tower means: each user's device maintains a local copy of the user-tower model, trains on the user's own interaction history, and sends only the updated parameters to the server.
+**Why the program lists federated user tower as aspirational (Phase 5+).** The program's architecture has an item tower and a user tower. The item tower is trained on artwork data that the platform owns or licenses — there is no privacy motivation for federating it. The user tower is trained on user behavioural data, which is where the privacy concern concentrates. Federating the user tower means: each user's device maintains a local copy of the user-tower model, trains on the user's own interaction history, and sends only the updated parameters to the server.
 
 This is architecturally clean and privacy-preserving. It is also research-grade for a system at this scale, for three reasons. First, art browsing is sparse — many users have few interactions, and local training on a handful of data points produces noisy updates. Second, the interaction data includes server-side events (collection groupings, purchase inquiries) that do not naturally live on the client. Third, the two-tower architecture requires the user-tower output to live in the same embedding space as the item tower, which means the user tower's training must be tightly coordinated with item-tower updates — a synchronisation problem that federated settings make harder.
 
@@ -78,7 +78,7 @@ This is what most production ML systems actually do. It is not elegant, and the 
 
 ### 10.4 What is tractable today
 
-An honest assessment of where these techniques sit for a system at Beowolff-Embed's scale:
+An honest assessment of where these techniques sit for a system at Rasa's scale:
 
 **Differential privacy.** Not tractable at the quality level needed for competitive recommendation. The noise required for meaningful $\varepsilon$ values degrades fine-grained preference learning too severely. Monitor the research frontier — techniques are improving yearly, and the gap is narrowing — but do not promise DP training in the near-term roadmap.
 

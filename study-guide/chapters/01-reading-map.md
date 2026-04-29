@@ -2,7 +2,7 @@
 
 ### How to use this reader
 
-This reader exists so you can read the Beowolff-Embed program file and the attribution whitepaper (available in the [Whitepapers](../whitepapers/) section) and interrogate them rather than approve them on trust. Every ML concept those documents invoke — from contrastive losses to Shapley approximations to machine unlearning — is explained here at the depth needed to ask whether it was the right choice and what the alternatives would have been.
+This reader exists so you can read the Rasa program file and the attribution whitepaper (available in the [Whitepapers](../whitepapers/) section) and interrogate them rather than approve them on trust. Every ML concept those documents invoke — from contrastive losses to Shapley approximations to machine unlearning — is explained here at the depth needed to ask whether it was the right choice and what the alternatives would have been.
 
 The reader is written for a technically sophisticated reader comfortable with linear algebra, probability, and optimization, but who has not built production ML systems. Where your existing intuitions provide a bridge — loss functions, gradient descent, dimensionality reduction, experimental design — the guide names them and builds on them. Where no bridge exists — production pipeline tooling, approximate nearest-neighbor search, model distillation attacks — the guide builds the concept from scratch.
 

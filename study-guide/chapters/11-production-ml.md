@@ -8,7 +8,7 @@ The bridge to your existing knowledge is through experimental methodology. A/B t
 
 "Pipeline" is production ML's term for what an experimentalist would call a protocol — a sequence of steps, each with defined inputs and outputs, that transforms raw materials into a finished product. The word carries a specific connotation: each step should be automated, deterministic, and independently testable.
 
-A typical training pipeline for an embedding model like Beowolff-Embed has six stages:
+A typical training pipeline for an embedding model like Rasa has six stages:
 
 **Data ingestion.** Raw data enters the system: images from museum APIs, metadata from curatorial databases, behavioural logs from the platform, price records from auction archives. Ingestion includes validation (is the image corrupt? is the metadata schema correct?), deduplication (the same Rembrandt appears in WikiArt, the Met, and Rijksmuseum — are they merged or kept separate?), and provenance logging (where did this data come from, when, under what license?).
 
@@ -58,7 +58,7 @@ A model card (Mitchell et al., 2019) is a structured document that accompanies a
 
 - *Model description.* Architecture, parameter count, training objective.
 - *Training data.* Description of the training corpus — size, sources, preprocessing, known biases. Not the data itself, but enough information to understand what the model was trained on.
-- *Evaluation results.* Performance on held-out test sets, broken down by relevant strata (for Beowolff-Embed: warm vs. cold items, art period, medium, geographic origin).
+- *Evaluation results.* Performance on held-out test sets, broken down by relevant strata (for Rasa: warm vs. cold items, art period, medium, geographic origin).
 - *Intended use.* What the model is designed for (art recommendation, similarity search) and what it is not designed for (aesthetic quality judgment, authentication, market prediction).
 - *Limitations and biases.* Known failure modes, underrepresented populations in the training data, domains where performance degrades.
 - *Versioning metadata.* Version number, training date, parent version (what model this was fine-tuned from), changelog.

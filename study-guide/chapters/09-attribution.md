@@ -4,7 +4,7 @@
 
 When a work sells on the platform, the revenue event triggers a question: who contributed to this sale, and how should the proceeds be distributed? The artist made the work. The buyer found it because the system surfaced it. The system surfaced it because the embedding placed it in a navigable neighborhood. The neighborhood exists because other artists' works defined that region of the manifold. The algorithm that trained the embedding was built by engineers, shaped by researchers, governed by policy decisions.
 
-Each link in that causal chain has a different character, involves a different number of contributors, and calls for a different measurement method. The original Beowolff attribution whitepaper proposed a unified Shapley framework for all of it. This chapter argues — on the basis of both the theory and the practical literature — that a layered architecture is more honest and more implementable: Shapley values for one specific layer, simpler mechanisms for the rest, and a provenance ledger (Filix) as the shared audit trail.
+Each link in that causal chain has a different character, involves a different number of contributors, and calls for a different measurement method. The original attribution whitepaper proposed a unified Shapley framework for all of it. This chapter argues — on the basis of both the theory and the practical literature — that a layered architecture is more honest and more implementable: Shapley values for one specific layer, simpler mechanisms for the rest, and a provenance ledger (Filix) as the shared audit trail.
 
 ### Cooperative game theory and the Shapley value
 
@@ -44,7 +44,7 @@ Notice what this buys over the simpler "leave-one-out" approach. Leave-one-out w
 
 The standard argument against leave-one-out is context dependence: a contribution's value depends on what else is in the coalition. In classic Data Shapley — millions of training images, each contributing a tiny signal — this matters genuinely.
 
-But the Beowolff sale-attribution problem has different structure. When work X sells, the question is not "what was every training point's contribution to overall model quality?" It is "what caused this specific sale?" That is a causal chain, not a coalition game. The chain has a small number of links, each involving a different kind of contributor. And for the one layer where Shapley is genuinely needed — manifold-shaping credit among corpora — the number of relevant contributors per region is small (tens, not millions), so even exact Shapley is tractable.
+But the Rasa sale-attribution problem has different structure. When work X sells, the question is not "what was every training point's contribution to overall model quality?" It is "what caused this specific sale?" That is a causal chain, not a coalition game. The chain has a small number of links, each involving a different kind of contributor. And for the one layer where Shapley is genuinely needed — manifold-shaping credit among corpora — the number of relevant contributors per region is small (tens, not millions), so even exact Shapley is tractable.
 
 This is the key insight: the regime matters. Shapley's permutation-averaging is essential when you have many symmetric players making small contributions and you need to divide a pie among all of them fairly. It is overkill when you have a few large, structurally distinct contributors whose effects are measurable by simpler methods.
 
@@ -151,7 +151,7 @@ For the corpus-level Shapley computation in Layer 2, several methods are availab
 
 **Influence functions** (Koh & Liang, 2017). Approximate the leave-one-out effect using the model's gradient, without retraining. Cheap at query time. The approximation breaks down for highly non-convex loss landscapes (which deep networks have), but refinements — TracIn (Pruthi et al. 2020), TRAK (Park et al. 2023), DataInf (Kwon et al. 2023) — have extended the approach to large Transformers and contrastive models including CLIP.
 
-**For Beowolff specifically:** at the corpus level (tens of contributors, not millions), the computation is tractable by any of these methods. The practical choice is probably TRAK or DataInf for the initial approximation (cheap, validated on CLIP-like models), with periodic full Monte Carlo Shapley as a calibration check.
+**For Rasa specifically:** at the corpus level (tens of contributors, not millions), the computation is tractable by any of these methods. The practical choice is probably TRAK or DataInf for the initial approximation (cheap, validated on CLIP-like models), with periodic full Monte Carlo Shapley as a calibration check.
 
 ### The Filix ledger as audit trail
 

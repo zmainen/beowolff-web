@@ -26,7 +26,7 @@ This is a softmax cross-entropy loss over similarities. Minimizing it does two t
 
 **Why "InfoNCE"?** The name comes from Noise-Contrastive Estimation. Oord et al. showed that this loss function provides a lower bound on the mutual information between the anchor's input and the positive's input: $\mathcal{L}_\text{InfoNCE} \geq \log N - I(x; x^+)$. Maximizing InfoNCE (minimizing the loss) maximizes a lower bound on mutual information. Intuitively, two items that share a lot of information (same image under different augmentations, same artist's works, same collector's purchases) should have high mutual information, and InfoNCE trains the model to capture this.
 
-The connection to **noise-contrastive estimation in language models** is worth noting: word2vec's skip-gram objective is a special case of InfoNCE where the positive pair is (word, context word) and the negatives are randomly sampled words. The embeddings that word2vec produces — where "king - man + woman = queen" — are a contrastive learning outcome. The Beowolff-Embed program is applying the same principle to artworks instead of words, with a richer definition of what constitutes a positive pair.
+The connection to **noise-contrastive estimation in language models** is worth noting: word2vec's skip-gram objective is a special case of InfoNCE where the positive pair is (word, context word) and the negatives are randomly sampled words. The embeddings that word2vec produces — where "king - man + woman = queen" — are a contrastive learning outcome. The Rasa program is applying the same principle to artworks instead of words, with a richer definition of what constitutes a positive pair.
 
 ### Temperature: the sharpness dial
 
@@ -116,7 +116,7 @@ Mitigation strategies include: using metadata to filter out likely false negativ
 
 ### Multi-positive contrastive: the program's specific variant
 
-Standard contrastive learning has one positive per anchor. The Beowolff-Embed program uses **multiple positives per anchor**, drawn from the metadata graph, with hierarchical weighting. This is a significant departure from vanilla contrastive learning and deserves careful attention.
+Standard contrastive learning has one positive per anchor. The Rasa program uses **multiple positives per anchor**, drawn from the metadata graph, with hierarchical weighting. This is a significant departure from vanilla contrastive learning and deserves careful attention.
 
 For a given anchor artwork, the positive set includes:
 
@@ -139,13 +139,13 @@ where $w_k$ is the hierarchical weight for positive $k$. Same-artist positives g
 
 **What multi-positive buys.** Standard single-positive contrastive can only learn from one relationship at a time. If the positive is always "same artist," the model learns artist similarity but not stylistic or iconographic similarity. If positives rotate between relationship types across batches, the model gets conflicting signals (this batch says "Monet and Renoir are different"; next batch says "Monet and Renoir are similar because they're both Impressionists"). Multi-positive with hierarchical weighting resolves this: in every batch, the model sees all levels of similarity simultaneously, with appropriate weights. The geometry reflects a hierarchy — same-artist pairs are closer than same-school pairs, which are closer than same-Iconclass pairs, which are closer than random pairs.
 
-**How this differs from standard practice.** Most contrastive learning systems in production (CLIP, SimCLR, DINO) use a single positive per anchor. Pinterest's ItemSage uses multi-positive contrastive with co-occurrence on boards as the positive signal, which is closer to what Beowolff proposes. The hierarchical weighting based on metadata-graph distance is, as far as I can tell, the program's specific contribution rather than an off-the-shelf method.
+**How this differs from standard practice.** Most contrastive learning systems in production (CLIP, SimCLR, DINO) use a single positive per anchor. Pinterest's ItemSage uses multi-positive contrastive with co-occurrence on boards as the positive signal, which is closer to what Rasa proposes. The hierarchical weighting based on metadata-graph distance is, as far as I can tell, the program's specific contribution rather than an off-the-shelf method.
 
 **The risk.** Hierarchical positives create a multi-scale optimization problem. If same-artist positives are weighted too heavily, the model collapses artist clusters — all Rothkos at one point, all Newmans at another — with no internal structure within an artist's oeuvre. If same-Iconclass positives are weighted too heavily, the model produces a coarse semantic map where all "female saints" are at one point regardless of artist or period. The weighting scheme determines the balance between specificity and generality in the embedding, and getting it wrong produces a model that is good at one level of the hierarchy but bad at others. This is tunable, but it is a large hyperparameter space — the interaction between hierarchy weights, temperature, batch size, and mining strategy produces a combinatorial optimization landscape that requires systematic ablation to navigate.
 
 ### Putting it all together: how a training step works
 
-To make the full procedure concrete, here is what one training step looks like for the Beowolff-Embed system:
+To make the full procedure concrete, here is what one training step looks like for the Rasa system:
 
 1. **Sample a batch** of 8,192 artworks from the corpus. For each artwork, look up its metadata: artist, school, period, Iconclass subjects.
 

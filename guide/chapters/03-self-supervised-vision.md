@@ -2,13 +2,13 @@
 
 ### Starting from a model that already knows how to look
 
-The Beowolff-Embed image system does not start from scratch. It begins with a model called DINOv3, built by Meta in 2024, that has already learned to see by looking at over a billion images — photographs, illustrations, screenshots, everything the web contains. This pre-trained model arrives with a sophisticated understanding of visual structure: edges, textures, color relationships, spatial composition, object shapes.
+The Rasa image system does not start from scratch. It begins with a model called DINOv3, built by Meta in 2024, that has already learned to see by looking at over a billion images — photographs, illustrations, screenshots, everything the web contains. This pre-trained model arrives with a sophisticated understanding of visual structure: edges, textures, color relationships, spatial composition, object shapes.
 
 Why start here instead of building a vision system trained only on art? Because much of what the model needs to know is universal. Edges are edges whether they appear in a photograph or a painting. Texture is texture. The difference between warm and cool light, the way a composition balances mass across a frame, the distinction between smooth gradients and sharp boundaries — these are visual facts that transfer from one domain to another. Relearning them from scratch on art alone would cost weeks of computation and produce results no better than what DINOv3 already provides.
 
 What DINOv3 does *not* know is what matters specifically in art. It can see that two paintings have similar color palettes, but it does not know that palette is an art-historically significant feature. It can detect brushwork texture, but it does not know the difference between Impressionist broken color and Expressionist impasto. It sees compositional structure but does not know the conventions of devotional painting or the rules of ukiyo-e spatial arrangement.
 
-This is where fine-tuning comes in. The Beowolff system takes DINOv3's universal visual knowledge and adjusts it — trains it further on art, with art-specific objectives — so that the model learns to see what matters for art, not just what matters for photographs of dogs and kitchens. The universal foundation stays; art-specific refinement builds on top.
+This is where fine-tuning comes in. The Rasa system takes DINOv3's universal visual knowledge and adjusts it — trains it further on art, with art-specific objectives — so that the model learns to see what matters for art, not just what matters for photographs of dogs and kitchens. The universal foundation stays; art-specific refinement builds on top.
 
 ### What the model sees at different levels
 
@@ -20,7 +20,7 @@ A useful way to think about what the image model learns: it processes visual inf
 
 **High-level features** are the most abstract. Semantic meaning — is this a portrait? A landscape? A still life? Art-historical identity — is this Mannerist? Neoclassical? Conceptual? The pre-trained model can distinguish a portrait from a landscape (it learned that from photographs), but it cannot distinguish a Mannerist portrait from a Baroque one without being trained on art-historical examples. This is the level where the most art-specific learning happens.
 
-The Beowolff system's training strategy follows from this analysis: keep the low-level features as they are (they are already good), and focus the training effort on mid-level and high-level features where art-specific knowledge matters. For the full technical treatment of this layer-by-layer strategy, see [Reader Chapter 3](../../study-guide/#3).
+The Rasa system's training strategy follows from this analysis: keep the low-level features as they are (they are already good), and focus the training effort on mid-level and high-level features where art-specific knowledge matters. For the full technical treatment of this layer-by-layer strategy, see [Reader Chapter 3](../../study-guide/#3).
 
 ### Self-supervised learning: teaching itself
 
@@ -40,7 +40,7 @@ For photographs, this is fine. A dog is a dog whether the photo is slightly warm
 
 For art, some of these transformations destroy signal. Color is not a nuisance variable in art — Matisse's palette is a primary signature of his work. Aggressive color shifts during training tell the model that palette does not matter. But palette matters enormously. Similarly, cropping away the edges of a Mondrian can remove all compositional structure. Flipping a painting left-to-right reverses the directional logic of a history painting or the position of a hand in religious iconography.
 
-The Beowolff system must customize these transformations for art — reduce color shifting, use larger minimum crops, disable left-right flipping for categories where mirror symmetry is not meaningful. This is not a minor technical detail. It is a statement about what the model should learn to care about and what it should learn to ignore. Getting it wrong means training a model that is blind to features that make art recommendation interesting.
+The Rasa system must customize these transformations for art — reduce color shifting, use larger minimum crops, disable left-right flipping for categories where mirror symmetry is not meaningful. This is not a minor technical detail. It is a statement about what the model should learn to care about and what it should learn to ignore. Getting it wrong means training a model that is blind to features that make art recommendation interesting.
 
 For the full technical treatment of augmentation design for art, see [Reader Chapter 3](../../study-guide/#3).
 

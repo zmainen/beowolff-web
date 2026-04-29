@@ -8,7 +8,7 @@ A collector who spent last month browsing Impressionism and yesterday began expl
 
 Beyond recency, interactions cluster into sessions — a focused half-hour of browsing on a weekday evening, a deep dive into a single artist's oeuvre on a Saturday afternoon. Within a session, interactions are coherent: they reflect a single thread of curiosity. Across sessions, they may reflect completely different facets of the collector's taste. A bag of interactions loses this structure. A sequence model preserves it.
 
-The Beowolff user tower is a sequence model. It takes a collector's interactions in chronological order and processes them through a neural network that can attend to the pattern of the sequence — what came before, what came after, how much time elapsed between events — to produce a single point representing the collector's current state.
+The Rasa user tower is a sequence model. It takes a collector's interactions in chronological order and processes them through a neural network that can attend to the pattern of the sequence — what came before, what came after, how much time elapsed between events — to produce a single point representing the collector's current state.
 
 For the full technical treatment of the transformer architecture used in the user tower, see [Reader Chapter 7](../../study-guide/#7).
 
@@ -54,7 +54,7 @@ This mirrors the cold-start story for items from Chapter 6, but on the collector
 
 Any system that learns from your behavior and then shows you more of what you seem to like creates a feedback loop. You click on Impressionism. The system shows more Impressionism. You click on what is shown. The system becomes more confident you like Impressionism. Your point converges to one region and stays there.
 
-This is the filter bubble, and every major recommendation platform struggles with it. The mitigation in Beowolff is twofold.
+This is the filter bubble, and every major recommendation platform struggles with it. The mitigation in Rasa is twofold.
 
 First, the re-ranking step (Step 4 in Chapter 6) deliberately injects diversity. Some fraction of the recommendations come from outside your nearest neighbors — works from adjacent regions of the space, works from different traditions, works by emerging artists the system has not yet placed with confidence. These are exploration recommendations, and they exist to prevent the system from converging prematurely.
 
@@ -72,7 +72,7 @@ The user tower learns from behavioral sequences. It does not read minds. Several
 
 **Context.** You might browse high-end contemporary art during a focused research session and affordable prints during a casual scroll. The system tries to segment these sessions by the time gaps between interactions, but it has no access to your intent.
 
-These limitations are inherent to any behavioral recommendation system, not specific to Beowolff. They are worth naming because they define the boundary between what the system can learn about you and what remains yours alone.
+These limitations are inherent to any behavioral recommendation system, not specific to Rasa. They are worth naming because they define the boundary between what the system can learn about you and what remains yours alone.
 
 For the full technical treatment, including the mathematics of attention mechanisms and multi-head prediction, see [Reader Chapter 7](../../study-guide/#7).
 
