@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Guide — Beowolff</title>
+<title>Guide — Rasa</title>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -184,9 +184,9 @@ main .chapter-nav a:hover { color: var(--coral); }
 
 <nav>
   <div class="nav-header">
-    <a class="back" href="../">&larr; Beowolff</a>
+    <a class="back" href="../">&larr; Rasa</a>
     <h1>Guide</h1>
-    <div class="subtitle">Beowolff-Embed for the Art World</div>
+    <div class="subtitle">Rasa for the Art World</div>
   </div>
   <div class="accent-bar"></div>
   <a class="crosslink" href="../study-guide/">Technical depth &rarr; Open the Reader</a>
@@ -281,7 +281,7 @@ async function loadChapter(idx, scrollTo) {
 }
 
 async function printAll() {
-  let allHtml = '<h1 style="text-align:center; margin-bottom:2rem; font-family: var(--display);">Beowolff-Embed Guide</h1>';
+  let allHtml = '<h1 style="text-align:center; margin-bottom:2rem; font-family: var(--display);">Rasa Guide</h1>';
   for (const ch of chapters) {
     try {
       const resp = await fetch(ch.file);
