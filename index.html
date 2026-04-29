@@ -62,9 +62,13 @@ header .tagline {
 /* === MONDRIAN GRID === */
 .mondrian {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: auto auto;
   min-height: calc(100vh - 10rem);
+}
+.mondrian.top {
+  grid-template-columns: 2fr 1fr;
+}
+.mondrian.bottom {
+  grid-template-columns: 1fr 1fr 1fr;
 }
 
 .cell {
@@ -74,29 +78,28 @@ header .tagline {
   display: flex;
   flex-direction: column;
   position: relative;
-  transition: transform 0.15s;
 }
-.cell:nth-child(3n) { border-right: none; }
+.cell:last-child { border-right: none; }
 
-/* Color blocks — Mondrian accents */
-.cell-whitepapers { background: var(--pool-light); grid-row: span 2; }
-.cell-study { background: var(--sun-light); }
+/* Color blocks */
+.cell-program { background: var(--white); }
+.cell-team { background: var(--green-light); }
+.cell-reader { background: var(--sun-light); }
+.cell-whitepapers { background: var(--pool-light); }
 .cell-visualiser { background: var(--coral-light); }
-.cell-about { background: var(--white); }
-.cell-colophon { background: var(--green-light); }
 
-/* Colored top bar on each cell — the Mondrian accent */
+/* Colored top bar — Mondrian accent */
 .cell::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 6px;
 }
+.cell-program::before { background: var(--violet); }
+.cell-team::before { background: var(--green); }
+.cell-reader::before { background: var(--sun); }
 .cell-whitepapers::before { background: var(--pool); }
-.cell-study::before { background: var(--sun); }
 .cell-visualiser::before { background: var(--coral); }
-.cell-about::before { background: var(--violet); }
-.cell-colophon::before { background: var(--green); }
 
 .cell h2 {
   font-family: var(--serif);
@@ -105,13 +108,22 @@ header .tagline {
   margin-bottom: 0.75rem;
   line-height: 1.2;
 }
+.cell-program h2 {
+  font-size: 2.2rem;
+  margin-bottom: 1rem;
+}
 .cell .cell-desc {
   font-size: 0.9rem;
   line-height: 1.65;
   color: #444;
   margin-bottom: 1.5rem;
-  flex: 1;
 }
+.cell-program .cell-desc {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  max-width: 42rem;
+}
+.cell .cell-desc.flex { flex: 1; }
 .cell ul {
   list-style: none;
   margin-bottom: 1rem;
@@ -157,13 +169,14 @@ header .tagline {
   color: var(--black);
   transition: all 0.15s;
   align-self: flex-start;
+  margin-top: auto;
 }
 .cell .enter-link:hover {
   background: var(--black);
   color: var(--white);
 }
 
-/* Accent squares — Mondrian flourish */
+/* Accent bars */
 .mondrian-accent {
   width: 100%;
   display: flex;
@@ -190,11 +203,10 @@ footer a:hover { color: var(--pool); }
 
 /* === RESPONSIVE === */
 @media (max-width: 900px) {
-  .mondrian {
+  .mondrian.top, .mondrian.bottom {
     grid-template-columns: 1fr;
   }
   .cell { border-right: none; }
-  .cell-whitepapers { grid-row: span 1; }
   header h1 { font-size: 2.5rem; }
   header { padding: 1.5rem; }
   .cell { padding: 1.5rem; }
@@ -212,16 +224,81 @@ footer a:hover { color: var(--pool); }
 
 <!-- Mondrian accent bar -->
 <div class="mondrian-accent">
-  <div class="accent-block" style="flex: 2; background: var(--pool);"></div>
-  <div class="accent-block" style="flex: 1; background: var(--sun);"></div>
+  <div class="accent-block" style="flex: 2; background: var(--violet);"></div>
   <div class="accent-block" style="flex: 0.6; background: var(--white);"></div>
-  <div class="accent-block" style="flex: 1.2; background: var(--coral);"></div>
-  <div class="accent-block" style="flex: 0.4; background: var(--green);"></div>
+  <div class="accent-block" style="flex: 1; background: var(--sun);"></div>
+  <div class="accent-block" style="flex: 0.4; background: var(--pool);"></div>
+  <div class="accent-block" style="flex: 0.8; background: var(--coral);"></div>
 </div>
 
-<div class="mondrian">
+<!-- TOP ROW: Program (hero) + Team -->
+<div class="mondrian top">
 
-  <!-- WHITEPAPERS — tall left column -->
+  <div class="cell cell-program">
+    <h2>The Program</h2>
+    <p class="cell-desc">
+      Beowolff-Embed is a foundation embedding for art &mdash; a single learned representation that fuses image content, curatorial metadata, artist biography, collector behaviour, and market price into one continuous space. The embedding is the asset. Recommendation, search, valuation, and attribution are all downstream affordances of the same model.
+    </p>
+    <p class="cell-desc">
+      The architectural commitment that distinguishes this from a conventional recommender: the embedding is <em>attribution-grade</em>. Every recommendation is traceable to the training data that shaped it, and every contributor &mdash; artist, gallery, data partner &mdash; receives credit proportional to their measurable contribution to the system's value.
+    </p>
+    <ul>
+      <li>
+        <a href="study-guide/#2">Foundations</a>
+        <span class="label">What an embedding is</span>
+      </li>
+      <li>
+        <a href="study-guide/#9">Attribution</a>
+        <span class="label">Who gets paid, and why</span>
+      </li>
+      <li>
+        <a href="study-guide/#13">Risks</a>
+        <span class="label">Where it could be wrong</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="cell cell-team" style="border-right: none;">
+    <h2>Team</h2>
+    <p class="cell-desc flex">
+      <strong><a href="https://zmainen.org" style="color: inherit; text-decoration: none; border-bottom: 1px solid rgba(0,0,0,0.2);">Zachary F. Mainen</a></strong><br>
+      Champalimaud Foundation<br><br>
+      <strong>Andrew Wolff</strong><br>
+      Beowolff Capital<br><br>
+      <strong>Kyo Iigaya</strong><br>
+      Columbia University<br><br>
+      <strong>Daniel McNamee</strong><br>
+      Champalimaud Foundation
+    </p>
+  </div>
+
+</div>
+
+<!-- Thin accent divider -->
+<div class="mondrian-accent">
+  <div class="accent-block" style="flex: 1; background: var(--sun);"></div>
+  <div class="accent-block" style="flex: 0.5; background: var(--white);"></div>
+  <div class="accent-block" style="flex: 1.5; background: var(--pool);"></div>
+  <div class="accent-block" style="flex: 0.3; background: var(--coral);"></div>
+  <div class="accent-block" style="flex: 0.7; background: var(--green);"></div>
+</div>
+
+<!-- BOTTOM ROW: Reader + Whitepapers + Visualiser -->
+<div class="mondrian bottom">
+
+  <div class="cell cell-reader">
+    <h2>Guide</h2>
+    <p class="cell-desc">
+      The program explained for the art world. 13 chapters, no equations, real examples. Each links to the Reader for technical depth.
+    </p>
+    <a href="guide/" class="enter-link">Open Guide &rarr;</a>
+    <h2 style="margin-top: 1.5rem;">Reader</h2>
+    <p class="cell-desc flex">
+      Full technical deep dive. Same 13 chapters at tutorial depth — loss functions, architecture decisions, worked examples.
+    </p>
+    <a href="study-guide/" class="enter-link">Open Reader &rarr;</a>
+  </div>
+
   <div class="cell cell-whitepapers">
     <h2>Whitepapers</h2>
     <ul>
@@ -241,60 +318,17 @@ footer a:hover { color: var(--pool); }
     <a href="whitepapers/" class="enter-link">Read &rarr;</a>
   </div>
 
-  <!-- READER -->
-  <div class="cell cell-study">
-    <h2>Reader</h2>
-    <p class="cell-desc">
-      Tutorial-depth explainer of every ML concept in the Beowolff-Embed program. 13 chapters, from embeddings to risk analysis. Written for a scientist, not an engineer.
-    </p>
-    <a href="study-guide/" class="enter-link">Open Reader &rarr;</a>
-  </div>
-
-  <!-- VISUALISER -->
-  <div class="cell cell-visualiser">
+  <div class="cell cell-visualiser" style="border-right: none;">
     <h2>Visualiser</h2>
-    <p class="cell-desc">
-      Interactive map of 690,000+ artworks projected into aesthetic space. Pan, zoom, discover. Phase 0 of the embedding program.
+    <p class="cell-desc flex">
+      Interactive map of 690,000+ artworks projected into aesthetic space. Pan, zoom, discover.
     </p>
     <span class="enter-link" style="opacity: 0.4; cursor: default; border-style: dashed;">Coming Soon</span>
   </div>
 
-  <!-- ABOUT -->
-  <div class="cell cell-about">
-    <h2>The Program</h2>
-    <p class="cell-desc">
-      Beowolff-Embed is a foundation embedding for art &mdash; fusing image, metadata, biography, behaviour, and market price into one continuous space. The embedding is the asset. Recommendation, search, valuation, and attribution are downstream affordances.
-    </p>
-    <ul>
-      <li>
-        <a href="study-guide/#2">Foundations</a>
-        <span class="label">What an embedding is</span>
-      </li>
-      <li>
-        <a href="study-guide/#9">Attribution</a>
-        <span class="label">Who gets paid, and why</span>
-      </li>
-      <li>
-        <a href="study-guide/#13">Risks</a>
-        <span class="label">Where it could be wrong</span>
-      </li>
-    </ul>
-  </div>
-
-  <!-- COLOPHON -->
-  <div class="cell cell-colophon">
-    <h2>Team</h2>
-    <p class="cell-desc">
-      <strong><a href="https://zmainen.org" style="color: inherit; text-decoration: none; border-bottom: 1px solid var(--border);">Zachary F. Mainen</a></strong> &mdash; Champalimaud Foundation<br><br>
-      <strong>Andrew Wolff</strong> &mdash; Beowolff Capital<br><br>
-      <strong>Kyo Iigaya</strong> &mdash; Columbia University<br><br>
-      <strong>Daniel McNamee</strong> &mdash; Champalimaud Foundation
-    </p>
-  </div>
-
 </div>
 
-<!-- Bottom Mondrian accent -->
+<!-- Bottom accent -->
 <div class="mondrian-accent">
   <div class="accent-block" style="flex: 0.8; background: var(--green);"></div>
   <div class="accent-block" style="flex: 1.5; background: var(--white);"></div>

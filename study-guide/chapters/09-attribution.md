@@ -107,9 +107,9 @@ The architecture this implies: compute and store $\Delta$ once (expensive but ob
 
 **The political question is visible.** Who chooses $\omega$? That's a governance decision — and in the attribution framework, governance decisions are themselves attributable. The meaning function is a contribution whose effect on attribution can be measured. The recursion is productive, not circular: it means the system's value alignment is auditable, not hidden.
 
-### The neuroscience bridge: credit assignment
+### The structural analogy: credit assignment
 
-The attribution problem maps directly to credit assignment in reinforcement learning — a problem the reader knows well.
+The attribution problem has a useful structural analogy in reinforcement learning's credit assignment problem.
 
 In temporal-difference learning, an agent receives a reward at the end of a sequence of actions and must assign credit to the individual actions that produced it. The reward is analogous to the sale; the actions are analogous to the contributions (training data, algorithm, recommendations) that led to the sale. TD learning solves credit assignment by propagating value backward through the sequence: the value of a state is the expected future reward from that state, and each action's credit is the temporal difference — the change in expected value it produced.
 

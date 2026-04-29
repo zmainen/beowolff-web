@@ -50,7 +50,7 @@ FAISS (Facebook AI Similarity Search) is the library that makes two things possi
 
 **Why exact nearest-neighbor search is too slow.** The recommendation system computes a user embedding at query time and finds the $K$ nearest item embeddings. At 1M items with 768-dimensional embeddings, exact search means 1M dot products over 768 floats — roughly 30-50 ms on CPU with optimized BLAS. Tolerable in isolation, but the production system serves many queries per second, each must return in under 100 ms end-to-end, and the corpus will grow to 3-10M items. At 10M on CPU: 300-500 ms per query, far too slow.
 
-**The HNSW algorithm.** HNSW builds a multi-layer graph over the embedding space that allows navigating from any starting point to the neighborhood of any query point in $O(\log N)$ hops. The intuition — and this is the best bridge to something you already know — is a skip list in high-dimensional space.
+**The HNSW algorithm.** HNSW builds a multi-layer graph over the embedding space that allows navigating from any starting point to the neighborhood of any query point in $O(\log N)$ hops. The best intuition is a skip list in high-dimensional space.
 
 A skip list is a data structure for 1D ordered search: you maintain multiple "express lanes" of decreasing density over the same sorted data. To find an element, you start at the top (sparsest) layer, take big jumps until you overshoot, drop down one layer, take smaller jumps, and so on until you reach the bottom layer where every element is present. The total search time is $O(\log N)$ instead of $O(N)$.
 

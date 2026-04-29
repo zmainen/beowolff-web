@@ -2,11 +2,11 @@
 
 The program references "training pipelines," "model versioning," "model cards," "eval methodology," and "A/B testing" as though each is a single concept. Each is a substantial engineering domain with its own failure modes. This chapter explains what actually happens between "the model converged" and "users see recommendations" — the infrastructure that turns a trained model into a production feature. The gap between a working research prototype and a deployed system is where most ML projects stall, and understanding that gap is essential for evaluating whether the program's commitments (especially attribution-grade logging and reproducible training) are engineering-feasible or aspirational.
 
-The bridge to your existing expertise is less through neuroscience here and more through experimental methodology. A/B testing for recommenders is a variant of randomised controlled trials with the same concerns about sample size, multiple comparisons, and confounds — plus domain-specific problems that clinical trials do not face. And the reproducibility discipline the program requires is conceptually identical to the reproducibility crisis in experimental science: the question is not whether you intend to be reproducible, but whether the tools and practices actually achieve it.
+The bridge to your existing knowledge is through experimental methodology. A/B testing for recommenders is a variant of randomised controlled trials with the same concerns about sample size, multiple comparisons, and confounds — plus domain-specific problems that clinical trials do not face. And the reproducibility discipline the program requires is conceptually identical to the reproducibility crisis in experimental science: the question is not whether you intend to be reproducible, but whether the tools and practices actually achieve it.
 
 ### 11.1 Training pipelines
 
-"Pipeline" is production ML's term for what a bench scientist would call a protocol — a sequence of steps, each with defined inputs and outputs, that transforms raw materials into a finished product. The word carries a specific connotation: each step should be automated, deterministic, and independently testable.
+"Pipeline" is production ML's term for what an experimentalist would call a protocol — a sequence of steps, each with defined inputs and outputs, that transforms raw materials into a finished product. The word carries a specific connotation: each step should be automated, deterministic, and independently testable.
 
 A typical training pipeline for an embedding model like Beowolff-Embed has six stages:
 

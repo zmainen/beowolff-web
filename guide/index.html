@@ -3,10 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reader — Beowolff</title>
+<title>Guide — Beowolff</title>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@300;400;500&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
@@ -14,11 +12,11 @@
 :root {
   --black: #1a1a1a;
   --white: #faf9f6;
-  --sun: #f0c040;
-  --sun-light: #fef6d8;
-  --sun-pale: #fffdf5;
-  --pool: #2fa8cc;
   --coral: #e8573a;
+  --coral-light: #fde8e3;
+  --coral-pale: #fff5f2;
+  --pool: #2fa8cc;
+  --sun: #f0c040;
   --border: #d4d0c8;
   --muted: #6b6b6b;
   --link: #1a6b8a;
@@ -34,10 +32,9 @@
 html { font-size: 17px; }
 body { font-family: var(--serif); color: var(--black); background: var(--white); display: flex; min-height: 100vh; }
 
-/* === SIDEBAR === */
 nav {
   width: var(--sidebar-w); min-width: var(--sidebar-w);
-  background: var(--sun-pale);
+  background: var(--coral-pale);
   border-right: 3px solid var(--line);
   padding: 0;
   position: fixed; top: 0; left: 0; height: 100vh;
@@ -55,7 +52,7 @@ nav .back {
   color: var(--muted); text-decoration: none;
   margin-bottom: 0.75rem;
 }
-nav .back:hover { color: var(--sun); }
+nav .back:hover { color: var(--coral); }
 nav h1 {
   font-family: var(--display); font-size: 1.5rem;
   font-weight: 400; line-height: 1.15;
@@ -66,7 +63,17 @@ nav .subtitle {
   color: var(--muted); letter-spacing: 0.06em;
   text-transform: uppercase;
 }
-nav .accent-bar { height: 5px; background: var(--sun); }
+nav .accent-bar { height: 5px; background: var(--coral); }
+nav .crosslink {
+  display: block;
+  padding: 0.6rem 1.25rem;
+  font-family: var(--mono); font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  color: var(--muted); text-decoration: none;
+  border-bottom: 1px solid var(--border);
+  background: rgba(232,87,58,0.04);
+}
+nav .crosslink:hover { color: var(--coral); }
 nav .nav-body {
   padding: 1rem 1.25rem;
   flex: 1; overflow-y: auto;
@@ -89,8 +96,8 @@ nav ol li a {
   border-radius: 4px; line-height: 1.35;
   transition: background 0.15s;
 }
-nav ol li a:hover { background: rgba(240,192,64,0.2); }
-nav ol li a.active { background: var(--sun); color: var(--black); }
+nav ol li a:hover { background: rgba(232,87,58,0.12); }
+nav ol li a.active { background: var(--coral); color: #fff; }
 nav .nav-footer {
   padding: 1rem 1.25rem;
   border-top: 1px solid var(--border);
@@ -98,12 +105,11 @@ nav .nav-footer {
   color: var(--muted); line-height: 1.6;
 }
 nav .nav-footer a { color: var(--link); text-decoration: none; }
-nav .nav-footer a:hover { color: var(--sun); }
+nav .nav-footer a:hover { color: var(--coral); }
 
-/* === CONTENT === */
 main {
   margin-left: var(--sidebar-w); flex: 1;
-  max-width: 52rem; padding: 3rem 3.5rem 6rem;
+  max-width: 48rem; padding: 3rem 3.5rem 6rem;
 }
 main h1 {
   font-family: var(--display); font-size: 2.2rem;
@@ -119,34 +125,20 @@ main h3 {
   font-family: var(--sans); font-size: 1.05rem;
   font-weight: 600; margin-top: 2rem; margin-bottom: 0.5rem;
 }
-main h4 {
-  font-family: var(--sans); font-size: 0.95rem;
-  font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.4rem;
-}
-main p { margin-bottom: 1rem; line-height: 1.75; font-weight: 300; }
+main p { margin-bottom: 1rem; line-height: 1.8; font-weight: 300; font-size: 1.02rem; }
 main strong { font-weight: 600; }
 main ul, main ol { margin-bottom: 1rem; padding-left: 1.5rem; }
-main li { margin-bottom: 0.35rem; line-height: 1.65; font-weight: 300; }
+main li { margin-bottom: 0.4rem; line-height: 1.7; font-weight: 300; }
+main em { font-style: italic; }
 main blockquote {
-  border-left: 4px solid var(--sun);
+  border-left: 4px solid var(--coral);
   padding: 0.75rem 1.25rem; margin: 1.25rem 0;
-  background: var(--sun-pale);
+  background: var(--coral-pale);
 }
 main blockquote p { margin-bottom: 0.5rem; }
 main blockquote p:last-child { margin-bottom: 0; }
-main code {
-  font-family: var(--mono); font-size: 0.85em;
-  background: var(--code-bg); padding: 0.15em 0.35em;
-  border-radius: 3px;
-}
-main pre {
-  background: var(--code-bg); border: 1px solid var(--border);
-  border-radius: 6px; padding: 1rem 1.25rem;
-  overflow-x: auto; margin-bottom: 1.25rem; line-height: 1.5;
-}
-main pre code { background: none; padding: 0; font-size: 0.82rem; }
 main a { color: var(--link); }
-main a:hover { color: var(--pool); }
+main a:hover { color: var(--coral); }
 main table { border-collapse: collapse; width: 100%; margin-bottom: 1.25rem; font-size: 0.9rem; }
 main th, main td {
   border: 1px solid var(--border); padding: 0.5rem 0.75rem;
@@ -154,6 +146,16 @@ main th, main td {
 }
 main th { background: var(--code-bg); font-family: var(--sans); font-weight: 600; font-size: 0.82rem; }
 main hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+/* Deep-dive callout */
+main .deep-dive {
+  display: inline-block;
+  font-family: var(--mono); font-size: 0.7rem;
+  letter-spacing: 0.04em; color: var(--muted);
+  background: var(--code-bg); padding: 0.3rem 0.6rem;
+  border-radius: 3px; margin-top: 0.25rem;
+}
+main .deep-dive a { color: var(--link); text-decoration: none; }
+main .deep-dive a:hover { color: var(--coral); }
 main .chapter-nav {
   display: flex; justify-content: space-between;
   margin-top: 3rem; padding-top: 1.5rem;
@@ -164,14 +166,12 @@ main .chapter-nav a {
   color: var(--link); text-decoration: none;
   font-family: var(--sans); font-weight: 500;
 }
-main .chapter-nav a:hover { color: var(--sun); }
-.katex-display { margin: 1.25rem 0; overflow-x: auto; }
+main .chapter-nav a:hover { color: var(--coral); }
 
 @media print {
   nav { display: none; }
   main { margin-left: 0; max-width: 100%; padding: 1rem; }
   main .chapter-nav { display: none; }
-  body { font-size: 11pt; }
 }
 @media (max-width: 800px) {
   nav { position: static; width: 100%; min-width: 0; height: auto; border-right: none; border-bottom: 3px solid var(--line); }
@@ -185,11 +185,11 @@ main .chapter-nav a:hover { color: var(--sun); }
 <nav>
   <div class="nav-header">
     <a class="back" href="../">&larr; Beowolff</a>
-    <h1>Reader</h1>
-    <div class="subtitle">Beowolff-Embed Program</div>
+    <h1>Guide</h1>
+    <div class="subtitle">Beowolff-Embed for the Art World</div>
   </div>
   <div class="accent-bar"></div>
-  <a class="crosslink" href="../guide/" style="display:block; padding:0.6rem 1.25rem; font-family:var(--mono); font-size:0.65rem; letter-spacing:0.06em; color:var(--muted); text-decoration:none; border-bottom:1px solid var(--border); background:rgba(240,192,64,0.04);">Art-world version &rarr; Open the Guide</a>
+  <a class="crosslink" href="../study-guide/">Technical depth &rarr; Open the Reader</a>
   <div class="nav-body" id="toc"></div>
   <div class="nav-footer">
     <a href="#" onclick="printAll(); return false;">Export PDF</a><br>
@@ -204,19 +204,19 @@ main .chapter-nav a:hover { color: var(--sun); }
 <script>
 const entries = [
   { section: 'Chapters' },
-  { file: 'chapters/01-reading-map.md',          title: 'Reading Map',                         key: '1' },
-  { file: 'chapters/02-foundations.md',           title: 'Embeddings, Geometry, and Similarity', key: '2' },
-  { file: 'chapters/03-self-supervised-vision.md', title: 'Self-Supervised Vision: DINOv3',      key: '3' },
-  { file: 'chapters/04-contrastive-learning.md',  title: 'Contrastive Learning',                key: '4' },
-  { file: 'chapters/05-multi-modal-alignment.md', title: 'Multi-Modal Alignment',               key: '5' },
-  { file: 'chapters/06-recommendation-systems.md', title: 'Recommendation Systems',             key: '6' },
-  { file: 'chapters/07-sequence-modelling.md',    title: 'Sequence Modelling for User Behaviour', key: '7' },
-  { file: 'chapters/08-scaling.md',               title: 'Scaling Realities',                   key: '8' },
-  { file: 'chapters/09-attribution.md',           title: 'Attribution: From Theory to Practice', key: '9' },
-  { file: 'chapters/10-privacy.md',               title: 'Privacy-Preserving ML',               key: '10' },
-  { file: 'chapters/11-production-ml.md',         title: 'Production ML Operations',            key: '11' },
-  { file: 'chapters/12-threat-models.md',         title: 'Threat Models',                       key: '12' },
-  { file: 'chapters/13-risks.md',                 title: 'Where the Proposal Could Be Wrong',   key: '13' },
+  { file: 'chapters/01-reading-map.md',          title: 'How to Use This Guide',                key: '1' },
+  { file: 'chapters/02-foundations.md',           title: 'What Is an Embedding?',                key: '2' },
+  { file: 'chapters/03-self-supervised-vision.md', title: 'How the Model Learns to See',          key: '3' },
+  { file: 'chapters/04-contrastive-learning.md',  title: 'Teaching "Similar"',                   key: '4' },
+  { file: 'chapters/05-multi-modal-alignment.md', title: 'Five Signals in One Space',            key: '5' },
+  { file: 'chapters/06-recommendation-systems.md', title: 'How Recommendations Work',            key: '6' },
+  { file: 'chapters/07-sequence-modelling.md',    title: 'Learning What You Like',               key: '7' },
+  { file: 'chapters/08-scaling.md',               title: '690,000 Works in Your Browser',        key: '8' },
+  { file: 'chapters/09-attribution.md',           title: 'Who Gets Paid, and Why',               key: '9' },
+  { file: 'chapters/10-privacy.md',               title: 'Your Data, Your Choice',               key: '10' },
+  { file: 'chapters/11-production-ml.md',         title: 'From Research to Reality',             key: '11' },
+  { file: 'chapters/12-threat-models.md',         title: 'What Could Go Wrong (Adversaries)',    key: '12' },
+  { file: 'chapters/13-risks.md',                 title: 'What Could Go Wrong (Honestly)',       key: '13' },
 ];
 
 const chapters = entries.filter(e => e.file);
@@ -249,16 +249,6 @@ entries.forEach(e => {
   }
 });
 
-function renderMath(html) {
-  html = html.replace(/\$\$([\s\S]*?)\$\$/g, (_, tex) => {
-    try { return katex.renderToString(tex.trim(), { displayMode: true }); } catch(e) { return '$$' + tex + '$$'; }
-  });
-  html = html.replace(/(?<!\$)\$(?!\$)([^\n$]+?)\$(?!\$)/g, (_, tex) => {
-    try { return katex.renderToString(tex.trim(), { displayMode: false }); } catch(e) { return '$' + tex + '$'; }
-  });
-  return html;
-}
-
 function slugify(text) {
   return text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 }
@@ -279,7 +269,6 @@ async function loadChapter(idx, scrollTo) {
     if (!resp.ok) { content.innerHTML = `<h1>${ch.title}</h1><p style="color:var(--muted);">Chapter not yet available.</p>`; return; }
     const md = await resp.text();
     let html = marked.parse(md);
-    html = renderMath(html);
     html = addAnchors(html);
     const prev = idx > 0 ? `<a href="#" onclick="loadChapter(${idx-1}); return false;">&larr; ${chapters[idx-1].title}</a>` : '<span></span>';
     const next = idx < chapters.length - 1 ? `<a href="#" onclick="loadChapter(${idx+1}); return false;">${chapters[idx+1].title} &rarr;</a>` : '<span></span>';
@@ -292,13 +281,14 @@ async function loadChapter(idx, scrollTo) {
 }
 
 async function printAll() {
-  let allHtml = '<h1 style="text-align:center; margin-bottom:2rem; font-family: var(--display);">Beowolff-Embed Reader</h1>';
+  let allHtml = '<h1 style="text-align:center; margin-bottom:2rem; font-family: var(--display);">Beowolff-Embed Guide</h1>';
   for (const ch of chapters) {
     try {
       const resp = await fetch(ch.file);
       if (resp.ok) {
         const md = await resp.text();
-        let html = marked.parse(md); html = renderMath(html); html = addAnchors(html);
+        let html = marked.parse(md);
+        html = addAnchors(html);
         allHtml += '<div style="page-break-before:always;">' + html + '</div>';
       }
     } catch(e) {}
