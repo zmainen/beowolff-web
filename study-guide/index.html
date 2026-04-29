@@ -324,7 +324,11 @@ function navigateFromHash() {
   const idx = chapters.findIndex(c => c.key === parts[0]);
   if (idx >= 0 && idx !== currentIdx) loadChapter(idx, parts[1]);
 }
-navigateFromHash();
+if (window.location.hash) {
+  navigateFromHash();
+} else {
+  loadChapter(0);
+}
 window.addEventListener('hashchange', navigateFromHash);
 </script>
 </body>
