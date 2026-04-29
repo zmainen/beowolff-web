@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beowolff — Art Explorer</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0a0a0f; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; overflow: hidden; }
+#canvas { width: 100vw; height: 100vh; display: block; cursor: grab; }
+#canvas:active { cursor: grabbing; }
+
+#info {
+  position: fixed; top: 16px; left: 16px; z-index: 10;
+  background: rgba(12,16,26,0.85); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; padding: 12px 16px; max-width: 280px;
+  backdrop-filter: blur(8px); font-size: 13px; line-height: 1.5;
+}
+#info h1 { font-size: 16px; font-weight: 600; margin-bottom: 4px; color: #fff; }
+#info .count { color: #888; font-size: 12px; }
+
+#detail {
+  position: fixed; bottom: 20px; right: 20px; z-index: 10;
+  background: rgba(12,16,26,0.92); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px; padding: 0; max-width: 320px; display: none;
+  backdrop-filter: blur(12px); overflow: hidden;
+}
+#detail img { width: 100%; max-height: 240px; object-fit: contain; background: #111; }
+#detail .meta { padding: 12px 16px; }
+#detail .title { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+#detail .artist { font-size: 13px; color: #aaa; }
+#detail .extra { font-size: 12px; color: #666; margin-top: 4px; }
+#detail .close { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); border: none; color: #fff; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 14px; line-height: 24px; text-align: center; }
+
+#landmarks { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+.landmark { position: absolute; font-size: 12px; color: rgba(255,255,255,0.6); font-weight: 600; letter-spacing: 0.5px; text-shadow: 0 1px 6px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.7); white-space: nowrap; transform: translate(-50%, -50%); transition: opacity 0.3s; }
+
+#filters {
+  position: fixed; top: 16px; right: 16px; z-index: 10;
+  display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;
+}
+.filter-btn {
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+  color: #ccc; border-radius: 16px; padding: 4px 12px; font-size: 12px;
+  cursor: pointer; transition: all 0.2s;
+}
+.filter-btn.active { background: rgba(255,255,255,0.2); color: #fff; border-color: rgba(255,255,255,0.3); }
+.filter-btn .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+
+#loading {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20;
+  text-align: center; font-size: 14px; color: #888;
+}
+#loading .bar { width: 200px; height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 12px; }
+#loading .fill { height: 100%; background: #4a9eff; border-radius: 2px; transition: width 0.3s; width: 0%; }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div>Loading art collection…</div>
+  <div class="bar"><div class="fill" id="load-fill"></div></div>
+</div>
+
+<div id="info">
+  <h1>Beowolff Art Explorer</h1>
+  <div class="count" id="count"></div>
+</div>
+
+<div id="filters"></div>
+<div id="landmarks"></div>
+<canvas id="canvas"></canvas>
+
+<div id="detail">
+  <button class="close" onclick="closeDetail()">&times;</button>
+  <img id="detail-img" src="">
+  <div class="meta">
+    <div class="title" id="detail-title"></div>
+    <div class="artist" id="detail-artist"></div>
+    <div class="extra" id="detail-extra"></div>
+  </div>
+</div>
+
+<script>
+const SOS = "https://sos-de-muc-1.exo.io/beowolff-corpora";
+const BASE = `${SOS}/visualiser/v1`;
+
+const CORPUS_COLORS = {
+  rijksmuseum: [0.3, 0.6, 1.0],
+  wikiart: [1.0, 0.5, 0.2],
+  met: [0.2, 0.9, 0.5],
+  nga: [0.9, 0.3, 0.7],
+};
+const CORPUS_CSS = {
+  rijksmuseum: "#4d99ff",
+  wikiart: "#ff8033",
+  met: "#33e680",
+  nga: "#e64dB3",
+};
+
+let coords = null;       // Float32Array, N*2
+let meta = [];            // array of {c, a, t, d, m, cl, ik}
+let landmarks = [];
+let manifest = null;
+let N = 0;
+
+// View state
+let cx = 0, cy = 0, zoom = 1;
+let targetCx = 0, targetCy = 0, targetZoom = 1;
+let dragging = false, dragX = 0, dragY = 0;
+let activeCorpora = new Set();
+
+// Canvas
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+let W, H, dpr;
+
+function resize() {
+  dpr = window.devicePixelRatio || 1;
+  W = window.innerWidth; H = window.innerHeight;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.width = W + "px"; canvas.style.height = H + "px";
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener("resize", () => { resize(); draw(); });
+resize();
+
+// Data loading
+async function load() {
+  const fill = document.getElementById("load-fill");
+  fill.style.width = "10%";
+
+  // Load manifest
+  const mResp = await fetch(`${BASE}/manifest.json`);
+  manifest = await mResp.json();
+  N = manifest.total;
+  landmarks = manifest.landmarks || [];
+  fill.style.width = "20%";
+
+  // Load coords binary
+  const cResp = await fetch(`${BASE}/coords.bin`);
+  const cBuf = await cResp.arrayBuffer();
+  coords = new Float32Array(cBuf);
+  fill.style.width = "40%";
+
+  // Center view on data bounds
+  const b = manifest.bounds;
+  cx = targetCx = (b.xmin + b.xmax) / 2;
+  cy = targetCy = (b.ymin + b.ymax) / 2;
+  const span = Math.max(b.xmax - b.xmin, b.ymax - b.ymin);
+  zoom = targetZoom = Math.min(W, H) / span * 0.85;
+
+  // Load metadata chunks
+  const chunks = manifest.chunks || [];
+  for (let i = 0; i < chunks.length; i++) {
+    const resp = await fetch(`${BASE}/${chunks[i]}`);
+    const chunk = await resp.json();
+    meta.push(...chunk);
+    fill.style.width = (40 + 50 * (i + 1) / chunks.length) + "%";
+  }
+
+  fill.style.width = "95%";
+
+  // Setup filters
+  activeCorpora = new Set(Object.keys(manifest.corpora));
+  setupFilters();
+  setupLandmarks();
+
+  document.getElementById("count").textContent = `${N.toLocaleString()} works`;
+  document.getElementById("loading").style.display = "none";
+  fill.style.width = "100%";
+
+  draw();
+}
+
+function setupFilters() {
+  const container = document.getElementById("filters");
+  for (const [corpus, count] of Object.entries(manifest.corpora)) {
+    const btn = document.createElement("div");
+    btn.className = "filter-btn active";
+    btn.dataset.corpus = corpus;
+    btn.innerHTML = `<span class="dot" style="background:${CORPUS_CSS[corpus] || '#888'}"></span>${corpus} (${(count/1000).toFixed(0)}k)`;
+    btn.onclick = () => {
+      if (activeCorpora.has(corpus)) {
+        activeCorpora.delete(corpus);
+        btn.classList.remove("active");
+      } else {
+        activeCorpora.add(corpus);
+        btn.classList.add("active");
+      }
+      draw();
+    };
+    container.appendChild(btn);
+  }
+}
+
+function setupLandmarks() {
+  const container = document.getElementById("landmarks");
+  container.innerHTML = "";
+  for (const lm of landmarks) {
+    if (lm.count < 3000) continue; // only show major neighborhoods
+    const el = document.createElement("div");
+    el.className = "landmark";
+    // Clean up labels: strip "prints — " prefix (too common to be useful)
+    let label = lm.label.replace(/^prints\s*—\s*/i, "").replace(/^photographs\s*—\s*/i, "");
+    el.textContent = label || "Cluster " + lm.id;
+    el.dataset.x = lm.x;
+    el.dataset.y = lm.y;
+    container.appendChild(el);
+  }
+}
+
+function updateLandmarks() {
+  const els = document.querySelectorAll(".landmark");
+  for (const el of els) {
+    const lx = parseFloat(el.dataset.x);
+    const ly = parseFloat(el.dataset.y);
+    const sx = (lx - cx) * zoom + W / 2;
+    const sy = (ly - cy) * -zoom + H / 2;
+    el.style.left = sx + "px";
+    el.style.top = sy + "px";
+    // Fade out when zoomed in too far (labels become distracting)
+    el.style.opacity = zoom < 80 ? Math.max(0, 1 - zoom / 80) * 0.7 : 0;
+  }
+}
+
+// Rendering
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  if (!coords) return;
+
+  const pointSize = Math.max(0.5, Math.min(4, 1.5 * Math.sqrt(zoom / 10)));
+  const showLabels = zoom > 20;
+
+  for (let i = 0; i < N; i++) {
+    const corpus = meta[i]?.c;
+    if (!activeCorpora.has(corpus)) continue;
+
+    const x = coords[i * 2];
+    const y = coords[i * 2 + 1];
+    const sx = (x - cx) * zoom + W / 2;
+    const sy = (y - cy) * -zoom + H / 2;
+
+    // Frustum cull
+    if (sx < -10 || sx > W + 10 || sy < -10 || sy > H + 10) continue;
+
+    const col = CORPUS_COLORS[corpus] || [0.5, 0.5, 0.5];
+    const alpha = Math.min(0.9, 0.3 + zoom / 50);
+    ctx.fillStyle = `rgba(${col[0]*255|0},${col[1]*255|0},${col[2]*255|0},${alpha})`;
+    ctx.fillRect(sx - pointSize/2, sy - pointSize/2, pointSize, pointSize);
+  }
+
+  updateLandmarks();
+}
+
+// Interaction
+canvas.addEventListener("mousedown", (e) => {
+  dragging = true; dragX = e.clientX; dragY = e.clientY;
+});
+window.addEventListener("mousemove", (e) => {
+  if (!dragging) return;
+  const dx = e.clientX - dragX;
+  const dy = e.clientY - dragY;
+  cx -= dx / zoom;
+  cy += dy / zoom;
+  targetCx = cx; targetCy = cy;
+  dragX = e.clientX; dragY = e.clientY;
+  draw();
+});
+window.addEventListener("mouseup", () => { dragging = false; });
+
+canvas.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  const factor = e.deltaY > 0 ? 0.85 : 1.18;
+  zoom *= factor;
+  targetZoom = zoom;
+  draw();
+}, { passive: false });
+
+// Touch support
+let lastTouchDist = 0;
+canvas.addEventListener("touchstart", (e) => {
+  if (e.touches.length === 1) {
+    dragging = true;
+    dragX = e.touches[0].clientX;
+    dragY = e.touches[0].clientY;
+  } else if (e.touches.length === 2) {
+    lastTouchDist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+  }
+  e.preventDefault();
+}, { passive: false });
+canvas.addEventListener("touchmove", (e) => {
+  if (e.touches.length === 1 && dragging) {
+    const dx = e.touches[0].clientX - dragX;
+    const dy = e.touches[0].clientY - dragY;
+    cx -= dx / zoom; cy += dy / zoom;
+    targetCx = cx; targetCy = cy;
+    dragX = e.touches[0].clientX; dragY = e.touches[0].clientY;
+    draw();
+  } else if (e.touches.length === 2) {
+    const dist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+    if (lastTouchDist > 0) {
+      zoom *= dist / lastTouchDist;
+      targetZoom = zoom;
+      draw();
+    }
+    lastTouchDist = dist;
+  }
+  e.preventDefault();
+}, { passive: false });
+canvas.addEventListener("touchend", () => { dragging = false; lastTouchDist = 0; });
+
+// Click to show detail
+canvas.addEventListener("click", (e) => {
+  if (!coords || !meta.length) return;
+  const mx = e.clientX, my = e.clientY;
+  let closest = -1, closestDist = Infinity;
+  const threshold = 15; // pixels
+
+  for (let i = 0; i < N; i++) {
+    if (!activeCorpora.has(meta[i]?.c)) continue;
+    const sx = (coords[i*2] - cx) * zoom + W/2;
+    const sy = (coords[i*2+1] - cy) * -zoom + H/2;
+    const d = Math.abs(sx - mx) + Math.abs(sy - my);
+    if (d < closestDist && d < threshold) {
+      closest = i; closestDist = d;
+    }
+  }
+
+  if (closest >= 0) showDetail(closest);
+  else closeDetail();
+});
+
+function showDetail(i) {
+  const m = meta[i];
+  const panel = document.getElementById("detail");
+  const img = document.getElementById("detail-img");
+  const title = document.getElementById("detail-title");
+  const artist = document.getElementById("detail-artist");
+  const extra = document.getElementById("detail-extra");
+
+  if (m.ik && m.ik.startsWith("http")) {
+    img.src = m.ik;
+    img.style.display = "block";
+  } else if (m.ik) {
+    img.src = `${SOS}/${m.ik}`;
+    img.style.display = "block";
+  } else {
+    img.style.display = "none";
+  }
+  title.textContent = m.t || "Untitled";
+  artist.textContent = m.a || "";
+  extra.textContent = [m.d, m.m, m.c].filter(Boolean).join(" · ");
+  panel.style.display = "block";
+}
+
+function closeDetail() {
+  document.getElementById("detail").style.display = "none";
+}
+
+// Start
+load();
+</script>
+</body>
+</html>

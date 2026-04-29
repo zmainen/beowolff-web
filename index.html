@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beowolff</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #1a1a1a;
+  --white: #faf9f6;
+  --line: #111;
+  --pool: #2fa8cc;
+  --pool-light: #d4f1f9;
+  --sun: #f0c040;
+  --sun-light: #fef6d8;
+  --coral: #e8573a;
+  --coral-light: #fde8e3;
+  --green: #3a9e6e;
+  --green-light: #e0f4eb;
+  --violet: #7c5cbf;
+  --violet-light: #ede6f6;
+  --grid-line: 3px;
+  --sans: 'Space Grotesk', system-ui, sans-serif;
+  --serif: 'Instrument Serif', Georgia, serif;
+  --mono: 'IBM Plex Mono', monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 17px; background: var(--white); }
+body { color: var(--black); font-family: var(--sans); min-height: 100vh; }
+
+/* === HEADER === */
+header {
+  padding: 2.5rem 3rem 2rem;
+  border-bottom: var(--grid-line) solid var(--line);
+}
+header .title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+header h1 {
+  font-family: var(--serif);
+  font-size: 3.5rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+header .tagline {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 300;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #888;
+  padding-bottom: 0.3rem;
+}
+
+/* === MONDRIAN GRID === */
+.mondrian {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: auto auto;
+  min-height: calc(100vh - 10rem);
+}
+
+.cell {
+  border-right: var(--grid-line) solid var(--line);
+  border-bottom: var(--grid-line) solid var(--line);
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: transform 0.15s;
+}
+.cell:nth-child(3n) { border-right: none; }
+
+/* Color blocks — Mondrian accents */
+.cell-whitepapers { background: var(--pool-light); grid-row: span 2; }
+.cell-study { background: var(--sun-light); }
+.cell-visualiser { background: var(--coral-light); }
+.cell-about { background: var(--white); }
+.cell-colophon { background: var(--green-light); }
+
+/* Colored top bar on each cell — the Mondrian accent */
+.cell::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 6px;
+}
+.cell-whitepapers::before { background: var(--pool); }
+.cell-study::before { background: var(--sun); }
+.cell-visualiser::before { background: var(--coral); }
+.cell-about::before { background: var(--violet); }
+.cell-colophon::before { background: var(--green); }
+
+.cell h2 {
+  font-family: var(--serif);
+  font-size: 1.8rem;
+  font-weight: 400;
+  margin-bottom: 0.75rem;
+  line-height: 1.2;
+}
+.cell .cell-desc {
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: #444;
+  margin-bottom: 1.5rem;
+  flex: 1;
+}
+.cell ul {
+  list-style: none;
+  margin-bottom: 1rem;
+}
+.cell ul li {
+  padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.cell ul li:last-child { border-bottom: none; }
+.cell ul li a {
+  color: var(--black);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+.cell ul li a:hover { color: var(--pool); }
+.cell ul li .label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #999;
+  white-space: nowrap;
+}
+
+.cell .enter-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--black);
+  border-radius: 0;
+  color: var(--black);
+  transition: all 0.15s;
+  align-self: flex-start;
+}
+.cell .enter-link:hover {
+  background: var(--black);
+  color: var(--white);
+}
+
+/* Accent squares — Mondrian flourish */
+.mondrian-accent {
+  width: 100%;
+  display: flex;
+  border-bottom: var(--grid-line) solid var(--line);
+}
+.accent-block {
+  height: 2.5rem;
+  border-right: var(--grid-line) solid var(--line);
+}
+.accent-block:last-child { border-right: none; }
+
+/* === FOOTER === */
+footer {
+  padding: 1.5rem 3rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: #999;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+footer a { color: #666; text-decoration: none; }
+footer a:hover { color: var(--pool); }
+
+/* === RESPONSIVE === */
+@media (max-width: 900px) {
+  .mondrian {
+    grid-template-columns: 1fr;
+  }
+  .cell { border-right: none; }
+  .cell-whitepapers { grid-row: span 1; }
+  header h1 { font-size: 2.5rem; }
+  header { padding: 1.5rem; }
+  .cell { padding: 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-row">
+    <h1>Beowolff</h1>
+    <span class="tagline">Art Intelligence Platform</span>
+  </div>
+</header>
+
+<!-- Mondrian accent bar -->
+<div class="mondrian-accent">
+  <div class="accent-block" style="flex: 2; background: var(--pool);"></div>
+  <div class="accent-block" style="flex: 1; background: var(--sun);"></div>
+  <div class="accent-block" style="flex: 0.6; background: var(--white);"></div>
+  <div class="accent-block" style="flex: 1.2; background: var(--coral);"></div>
+  <div class="accent-block" style="flex: 0.4; background: var(--green);"></div>
+</div>
+
+<div class="mondrian">
+
+  <!-- WHITEPAPERS — tall left column -->
+  <div class="cell cell-whitepapers">
+    <h2>Whitepapers</h2>
+    <p class="cell-desc">
+      The theoretical and empirical foundations for the Beowolff attribution and recommendation architecture.
+    </p>
+    <ul>
+      <li>
+        <a href="whitepapers/#1">Value Attribution in Agentic Systems</a>
+        <span class="label">Shapley, Ledgers, Code</span>
+      </li>
+      <li>
+        <a href="whitepapers/#2">Practical Value Attribution Systems</a>
+        <span class="label">Industry Survey</span>
+      </li>
+      <li>
+        <a href="whitepapers/#3">Shapley Values for Data Valuation</a>
+        <span class="label">Literature Survey</span>
+      </li>
+    </ul>
+    <a href="whitepapers/" class="enter-link">Read &rarr;</a>
+  </div>
+
+  <!-- STUDY GUIDE -->
+  <div class="cell cell-study">
+    <h2>Study Guide</h2>
+    <p class="cell-desc">
+      Tutorial-depth explainer of every ML concept in the Beowolff-Embed program. 13 chapters, from embeddings to risk analysis. Written for a scientist, not an engineer.
+    </p>
+    <a href="study-guide/" class="enter-link">Open Guide &rarr;</a>
+  </div>
+
+  <!-- VISUALISER -->
+  <div class="cell cell-visualiser">
+    <h2>Visualiser</h2>
+    <p class="cell-desc">
+      Interactive map of 690,000+ artworks projected into aesthetic space. Pan, zoom, discover. Phase 0 of the embedding program.
+    </p>
+    <span class="enter-link" style="opacity: 0.4; cursor: default; border-style: dashed;">Coming Soon</span>
+  </div>
+
+  <!-- ABOUT -->
+  <div class="cell cell-about">
+    <h2>The Program</h2>
+    <p class="cell-desc">
+      Beowolff-Embed is a foundation embedding for art &mdash; fusing image, metadata, biography, behaviour, and market price into one continuous space. The embedding is the asset. Recommendation, search, valuation, and attribution are downstream affordances.
+    </p>
+    <ul>
+      <li>
+        <a href="study-guide/#2">Foundations</a>
+        <span class="label">What an embedding is</span>
+      </li>
+      <li>
+        <a href="study-guide/#9">Attribution</a>
+        <span class="label">Who gets paid, and why</span>
+      </li>
+      <li>
+        <a href="study-guide/#13">Risks</a>
+        <span class="label">Where it could be wrong</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- COLOPHON -->
+  <div class="cell cell-colophon">
+    <h2>Team</h2>
+    <p class="cell-desc">
+      <strong>Zachary F. Mainen</strong><br><br>
+      <strong>Andrew Wolff</strong> &mdash; Beowolff Capital<br><br>
+      <strong>Kyo Iigaya</strong> &mdash; Columbia University<br><br>
+      <strong>Daniel McNamee</strong> &mdash; Caltech
+    </p>
+  </div>
+
+</div>
+
+<!-- Bottom Mondrian accent -->
+<div class="mondrian-accent">
+  <div class="accent-block" style="flex: 0.8; background: var(--green);"></div>
+  <div class="accent-block" style="flex: 1.5; background: var(--white);"></div>
+  <div class="accent-block" style="flex: 0.5; background: var(--violet);"></div>
+  <div class="accent-block" style="flex: 2; background: var(--sun);"></div>
+  <div class="accent-block" style="flex: 0.3; background: var(--pool);"></div>
+</div>
+
+<footer>
+  <span>Beowolff, 2026</span>
+  <a href="https://github.com/zmainen/haak">HAAK Platform</a>
+</footer>
+
+</body>
+</html>
