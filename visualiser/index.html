@@ -52,18 +52,46 @@ body { background: #0a0a0f; color: #e0e0e0; font-family: -apple-system, BlinkMac
 /* Controls: top-right */
 #controls {
   position: fixed; top: 16px; right: 16px; z-index: 10;
-  display: flex; flex-direction: column; gap: 8px; align-items: flex-end;
+  background: rgba(12,16,26,0.85); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; padding: 10px 12px;
+  backdrop-filter: blur(8px);
 }
-#filters { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
-#projection-toggle { display: flex; gap: 4px; }
+#filters { display: flex; flex-direction: column; gap: 3px; }
+#projection-toggle { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
 
 .ctrl-btn {
-  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-  color: #ccc; border-radius: 16px; padding: 4px 12px; font-size: 12px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  color: #666; border-radius: 6px; padding: 5px 12px; font-size: 12px;
   cursor: pointer; transition: all 0.2s; user-select: none;
+  display: flex; align-items: center; gap: 6px; min-width: 160px;
 }
-.ctrl-btn.active { background: rgba(255,255,255,0.2); color: #fff; border-color: rgba(255,255,255,0.3); }
-.ctrl-btn .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+.ctrl-btn.active { background: rgba(255,255,255,0.12); color: #fff; border-color: rgba(255,255,255,0.25); }
+.ctrl-btn .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; opacity: 0.3; transition: opacity 0.2s; }
+.ctrl-btn.active .dot { opacity: 1.0; }
+.ctrl-btn .toggle { width: 28px; height: 14px; border-radius: 7px; background: rgba(255,255,255,0.15); position: relative; flex-shrink: 0; transition: background 0.2s; }
+.ctrl-btn .toggle::after { content: ""; position: absolute; width: 10px; height: 10px; border-radius: 50%; background: #666; top: 2px; left: 2px; transition: all 0.2s; }
+.ctrl-btn.active .toggle { background: rgba(74,158,255,0.5); }
+.ctrl-btn.active .toggle::after { background: #4a9eff; left: 16px; }
+
+.help-link { color: #4a9eff; font-size: 12px; cursor: pointer; margin-top: 6px; }
+.help-link:hover { text-decoration: underline; }
+
+#help-panel {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 25;
+  background: rgba(12,16,26,0.97); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 12px; padding: 28px 32px; max-width: 520px; width: 90vw;
+  backdrop-filter: blur(16px); display: none; max-height: 80vh; overflow-y: auto;
+  line-height: 1.65; font-size: 14px;
+}
+#help-panel h2 { font-size: 18px; color: #fff; margin-bottom: 12px; }
+#help-panel h3 { font-size: 14px; color: #4a9eff; margin-top: 16px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+#help-panel p { color: #bbb; margin-bottom: 10px; }
+#help-panel strong { color: #fff; }
+#help-panel a { color: #4a9eff; text-decoration: none; }
+#help-panel a:hover { text-decoration: underline; }
+#help-panel .footer { font-size: 12px; color: #666; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; }
+#help-panel .close { position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.1); border: none; color: #aaa; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-size: 16px; line-height: 28px; text-align: center; }
+#help-panel .close:hover { background: rgba(255,255,255,0.2); color: #fff; }
 
 #loading {
   position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20;
@@ -83,6 +111,23 @@ body { background: #0a0a0f; color: #e0e0e0; font-family: -apple-system, BlinkMac
 <div id="info">
   <h1>Beowolff Art Explorer</h1>
   <div class="count" id="count"></div>
+  <div class="help-link" onclick="toggleHelp()">What am I looking at?</div>
+</div>
+
+<div id="help-panel">
+  <button class="close" onclick="toggleHelp()">&times;</button>
+  <h2>What is this?</h2>
+  <p>Every dot is an artwork from the Rijksmuseum collection. Works that are similar land near each other. The map is computed by projecting high-dimensional representations of each work into two dimensions using UMAP.</p>
+
+  <h3>Two ways of seeing</h3>
+  <p><strong>Semantic (SigLIP)</strong> organizes by what works depict and what tradition they belong to. SigLIP is a vision-language model (Google, 2023) trained on billions of image-text pairs. It learned to encode both what things look like and what they mean — a Vermeer interior and a Hopper interior share a direction (dimly lit room, solitary figure) while differing along others (17th-century Dutch vs. 20th-century American). This is why prints, photographs, paintings, and drawings form distinct continents.</p>
+
+  <p><strong>Aesthetic (Iigaya)</strong> organizes by how works feel. Thirteen perceptual dimensions — brightness, hue contrast, sharpness, color temperature, compositional balance, visual dynamics — derived from a computational model of aesthetic preference (Iigaya et al., Nature Human Behaviour 2021). A dark moody photograph and a dark moody painting land near each other regardless of medium, because they share the same aesthetic character.</p>
+
+  <h3>Navigation</h3>
+  <p>Pan by dragging. Zoom with scroll wheel (zooms toward your cursor). Hover over a dot to see the artwork. Click to pin the detail panel. Toggle collections on and off to isolate what you want to explore.</p>
+
+  <p class="footer">Built by <a href="https://t.me/BeowolffArtBot">Beowolff</a> · Zachary Mainen · Champalimaud Research</p>
 </div>
 
 <div id="controls">
@@ -237,7 +282,7 @@ function setupFilters() {
     btn.className = "ctrl-btn active";
     btn.dataset.type = tp;
     const k = count >= 1000 ? `${(count/1000).toFixed(0)}k` : count;
-    btn.innerHTML = `<span class="dot" style="background:${TYPE_CSS[tp] || '#888'}"></span>${tp} (${k})`;
+    btn.innerHTML = `<span class="toggle"></span><span class="dot" style="background:${TYPE_CSS[tp] || '#888'}"></span>${tp} (${k})`;
     btn.onclick = () => {
       if (activeTypes.has(tp)) { activeTypes.delete(tp); btn.classList.remove("active"); }
       else { activeTypes.add(tp); btn.classList.add("active"); }
@@ -252,13 +297,13 @@ function setupProjectionToggle() {
   const btnS = document.createElement("div");
   btnS.className = "ctrl-btn active";
   btnS.id = "btn-siglip";
-  btnS.textContent = "Semantic (SigLIP)";
+  btnS.innerHTML = '<span class="toggle"></span>Semantic (SigLIP)';
   btnS.onclick = () => switchProjection("siglip");
 
   const btnI = document.createElement("div");
   btnI.className = "ctrl-btn";
   btnI.id = "btn-iigaya";
-  btnI.textContent = "Aesthetic (Iigaya)";
+  btnI.innerHTML = '<span class="toggle"></span>Aesthetic (Iigaya)';
   btnI.style.opacity = coordsIigaya ? "1" : "0.4";
   btnI.onclick = () => switchProjection("iigaya");
 
@@ -535,6 +580,11 @@ canvas.addEventListener("touchend", (e) => {
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeDetail();
 });
+
+function toggleHelp() {
+  const panel = document.getElementById("help-panel");
+  panel.style.display = panel.style.display === "block" ? "none" : "block";
+}
 
 load();
 </script>
