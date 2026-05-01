@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Rasa — How the Network Sees a Painting</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #fff;
+  font-family: -apple-system, 'Helvetica Neue', sans-serif;
+  color: #1a1a1a;
+  padding: 20px 24px;
+  height: 100vh;
+  display: flex; flex-direction: column;
+}
+h1 { font-size: 22px; font-weight: 600; margin-bottom: 2px; }
+.subtitle { font-size: 15px; color: #777; margin-bottom: 12px; }
+
+.main { display: flex; gap: 20px; align-items: stretch; flex: 1; min-height: 0; }
+
+/* Left — input painting */
+.input-panel {
+  width: 180px; flex-shrink: 0;
+  display: flex; flex-direction: column;
+}
+.input-panel .lbl {
+  font-size: 13px; color: #999; text-transform: uppercase;
+  letter-spacing: 0.06em; margin-bottom: 6px;
+}
+.input-panel img {
+  width: 100%; border: 1px solid #d4d0c8;
+}
+.input-panel .caption {
+  font-size: 14px; color: #666; line-height: 1.45; margin-top: 10px;
+}
+
+/* Center — network canvas */
+.net-wrap { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+canvas { display: block; cursor: pointer; flex: 1; }
+.legend {
+  display: flex; gap: 16px; margin-top: 6px;
+  font-size: 12px; color: #999; align-items: center;
+}
+.legend .sw {
+  display: inline-block; width: 20px; height: 3px;
+  margin-right: 4px; vertical-align: middle;
+}
+
+/* Right — layer detail */
+.detail {
+  width: 240px; flex-shrink: 0;
+  border: 1px solid #d4d0c8; padding: 16px;
+  display: flex; flex-direction: column;
+  overflow-y: auto;
+}
+.detail .lbl {
+  font-size: 12px; color: #999; text-transform: uppercase;
+  letter-spacing: 0.06em; margin-bottom: 4px;
+}
+.detail h3 { font-size: 18px; font-weight: 600; margin-bottom: 3px; }
+.detail .dims {
+  font-size: 13px; color: #999; font-family: 'SF Mono', 'Menlo', monospace;
+  margin-bottom: 8px;
+}
+.detail .desc {
+  font-size: 14px; color: #555; line-height: 1.55; margin-bottom: 12px;
+}
+.detail .heatmap {
+  width: 100%; border: 1px solid #d4d0c8; margin-top: 4px;
+}
+.detail .channels {
+  width: 100%; border: 1px solid #d4d0c8; margin-top: 8px;
+}
+</style>
+</head>
+<body>
+
+<p class="subtitle">Each column is a layer. Click any layer to see what the model detects at that depth.</p>
+
+<div class="main">
+  <div class="input-panel">
+    <div class="lbl">Input painting</div>
+    <img id="thumb" src="" alt="Input">
+    <div class="caption">The network processes this image layer by layer, extracting progressively abstract features.</div>
+  </div>
+
+  <div class="net-wrap">
+    <canvas id="canvas" width="600" height="420"></canvas>
+    <div class="legend">
+      <span><span class="sw" style="background: #3a8fb7;"></span>active</span>
+      <span><span class="sw" style="background: #eee;"></span>inactive</span>
+      <span style="font-style: italic; margin-left: 8px;">node size = activation strength</span>
+    </div>
+  </div>
+
+  <div class="detail" id="detail">
+    <div class="lbl">Selected layer</div>
+    <h3 id="d-name">Click a layer</h3>
+    <div class="dims" id="d-dims"></div>
+    <div class="desc" id="d-desc"></div>
+    <div class="lbl" id="d-hm-lbl" style="display:none">Mean activation</div>
+    <img class="heatmap" id="d-hm" src="" style="display:none">
+    <div class="lbl" id="d-ch-lbl" style="display:none">Top channels</div>
+    <img class="channels" id="d-ch" src="" style="display:none">
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+const padL = 50, padR = 30, padT = 40, padB = 30;
+const netW = W - padL - padR, netH = H - padT - padB;
+
+let data = null, activeLayer = -1, layerColumns = [];
+
+const layerDescs = [
+  'Raw pixels — color values at each position.',
+  'Edges and gradients at every orientation. The most basic visual vocabulary.',
+  'Textures and local patterns. Brushwork becomes visible here.',
+  'Combinations of textures form larger motifs — repeating patterns, foliage.',
+  'Complex local structure. The model begins to see parts of objects.',
+  'Object parts — eyes, hands, columns. Art-specific features emerge.',
+  'How parts relate: composition, spatial arrangement, balance.',
+  'Global scene structure. Style differences become explicit.',
+  'High-level abstract features. "Impressionism" as geometry, not label.',
+  'Semantic content. What the painting is about, not what it looks like.',
+  'The embedding — this point IS the painting in the shared space.',
+];
+
+const C = {
+  node: '#3a8fb7', nodeDim: '#d8e8f0', wire: '#3a8fb7',
+  wireDim: '#f0f0f0', highlight: '#e8573a', text: '#1a1a1a', textDim: '#ccc',
+};
+
+function buildLayout() {
+  if (!data) return;
+  layerColumns = [];
+  const nLayers = data.layers.length + 2;
+  const spacing = netW / (nLayers - 1);
+
+  layerColumns.push({
+    x: padL, label: 'Input', desc: layerDescs[0], dims: '224 × 224 × 3',
+    dataIndex: -1,
+    nodes: Array.from({length: 8}, (_, i) => ({
+      y: padT + (i + 0.5) * netH / 8, r: 3,
+      activation: 0.5 + Math.random() * 0.5,
+    })),
+  });
+
+  data.layers.forEach((layer, i) => {
+    const nDisplay = Math.min(12, Math.max(4, Math.round(layer.channels / 50)));
+    const nodes = [];
+    for (let j = 0; j < nDisplay; j++) {
+      const act = 0.3 + Math.random() * 0.7;
+      nodes.push({ y: padT + (j + 0.5) * netH / nDisplay, r: 2 + act * 4, activation: act });
+    }
+    layerColumns.push({
+      x: padL + (i + 1) * spacing, label: layer.name,
+      desc: layerDescs[i + 1], dims: layer.dimensions, dataIndex: i, nodes,
+    });
+  });
+
+  layerColumns.push({
+    x: padL + (nLayers - 1) * spacing, label: 'Embed', desc: layerDescs[layerDescs.length - 1],
+    dims: '768-d', dataIndex: -2,
+    nodes: Array.from({length: 6}, (_, i) => ({
+      y: padT + (i + 0.5) * netH / 6, r: 3.5,
+      activation: 0.6 + Math.random() * 0.4,
+    })),
+  });
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  // Wires
+  for (let i = 0; i < layerColumns.length - 1; i++) {
+    const from = layerColumns[i], to = layerColumns[i + 1];
+    const isNear = (activeLayer === i || activeLayer === i + 1 ||
+      (activeLayer >= 0 && (i === activeLayer - 1 || i + 1 === activeLayer)));
+    for (const fn of from.nodes) {
+      for (const tn of to.nodes) {
+        const s = fn.activation * tn.activation;
+        if (isNear) {
+          ctx.strokeStyle = C.wire; ctx.globalAlpha = s * 0.35; ctx.lineWidth = s * 1.5;
+        } else {
+          ctx.strokeStyle = C.wireDim; ctx.globalAlpha = 0.6; ctx.lineWidth = 0.4;
+        }
+        ctx.beginPath(); ctx.moveTo(from.x, fn.y);
+        const cpx = (from.x + to.x) / 2;
+        ctx.bezierCurveTo(cpx, fn.y, cpx, tn.y, to.x, tn.y);
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.globalAlpha = 1;
+  // Nodes
+  for (let i = 0; i < layerColumns.length; i++) {
+    const col = layerColumns[i], isAct = (activeLayer === i);
+    for (const nd of col.nodes) {
+      ctx.beginPath(); ctx.arc(col.x, nd.y, nd.r, 0, Math.PI * 2);
+      ctx.fillStyle = isAct ? C.highlight : C.node;
+      ctx.globalAlpha = isAct ? 0.3 + nd.activation * 0.7 : 0.2 + nd.activation * 0.6;
+      ctx.fill(); ctx.globalAlpha = 1;
+      ctx.strokeStyle = isAct ? C.highlight : C.node;
+      ctx.globalAlpha = isAct ? 0.8 : 0.3;
+      ctx.lineWidth = isAct ? 1.5 : 0.5;
+      ctx.stroke(); ctx.globalAlpha = 1;
+    }
+    ctx.fillStyle = isAct ? C.text : C.textDim;
+    ctx.font = isAct ? 'bold 11px -apple-system, sans-serif' : '11px -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(col.label, col.x, padT - 10);
+    if (col.dataIndex >= 0 && data.layers[col.dataIndex].channels > 12) {
+      ctx.fillStyle = '#bbb'; ctx.font = '12px sans-serif';
+      ctx.fillText('⋮', col.x, padT + netH + 12);
+      ctx.font = '10px SF Mono, monospace';
+      ctx.fillText(data.layers[col.dataIndex].channels + ' ch', col.x, padT + netH + 24);
+    }
+  }
+  // Arrow
+  ctx.strokeStyle = '#ddd'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(padL, H - 6); ctx.lineTo(W - padR, H - 6); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(W - padR - 5, H - 10); ctx.lineTo(W - padR, H - 6); ctx.lineTo(W - padR - 5, H - 2);
+  ctx.stroke();
+  ctx.fillStyle = '#bbb'; ctx.font = '11px sans-serif';
+  ctx.textAlign = 'left'; ctx.fillText('shallow', padL, H - 14);
+  ctx.textAlign = 'right'; ctx.fillText('deep', W - padR, H - 14);
+}
+
+function updateDetail(i) {
+  const col = layerColumns[i];
+  document.getElementById('d-name').textContent = col.label;
+  document.getElementById('d-dims').textContent = col.dims;
+  document.getElementById('d-desc').textContent = col.desc;
+  const hmLbl = document.getElementById('d-hm-lbl');
+  const hm = document.getElementById('d-hm');
+  const chLbl = document.getElementById('d-ch-lbl');
+  const ch = document.getElementById('d-ch');
+  if (col.dataIndex >= 0) {
+    const layer = data.layers[col.dataIndex];
+    hmLbl.style.display = 'block'; hm.style.display = 'block';
+    hm.src = 'data:image/png;base64,' + layer.heatmap;
+    if (layer.top_channels) {
+      chLbl.style.display = 'block'; ch.style.display = 'block';
+      ch.src = 'data:image/png;base64,' + layer.top_channels;
+    } else { chLbl.style.display = 'none'; ch.style.display = 'none'; }
+  } else {
+    hmLbl.style.display = 'none'; hm.style.display = 'none';
+    chLbl.style.display = 'none'; ch.style.display = 'none';
+  }
+}
+
+canvas.addEventListener('click', e => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = (e.clientX - rect.left) * (W / rect.width);
+  let closest = 0, best = Infinity;
+  layerColumns.forEach((col, i) => {
+    const d = Math.abs(col.x - mx);
+    if (d < best) { closest = i; best = d; }
+  });
+  if (best < 40) { activeLayer = closest; draw(); updateDetail(closest); }
+});
+
+canvas.addEventListener('mousemove', e => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = (e.clientX - rect.left) * (W / rect.width);
+  let over = false;
+  layerColumns.forEach(col => { if (Math.abs(col.x - mx) < 30) over = true; });
+  canvas.style.cursor = over ? 'pointer' : 'default';
+});
+
+async function init() {
+  const resp = await fetch('activations.json');
+  data = await resp.json();
+  document.getElementById('thumb').src = 'data:image/png;base64,' + data.image;
+  buildLayout(); activeLayer = 1; draw(); updateDetail(1);
+}
+init();
+</script>
+</body>
+</html>

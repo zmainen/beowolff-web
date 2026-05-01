@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body { margin: 0; background: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; padding: 0; }
+svg { font-family: -apple-system, 'Helvetica Neue', sans-serif; width: 100%; height: 100%; }
+.title { font-size: 16px; font-weight: 600; fill: #1a1a1a; }
+.subtitle { font-size: 11px; fill: #777; }
+.section-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+.feat-name { font-size: 10px; font-weight: 600; fill: #1a1a1a; }
+.feat-desc { font-size: 8.5px; fill: #555; font-style: italic; }
+.cite { font-size: 9px; fill: #999; font-style: italic; }
+</style>
+</head>
+<body>
+<svg viewBox="20 20 870 450" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.06"/>
+    </filter>
+  </defs>
+
+  <text x="450" y="36" text-anchor="middle" class="subtitle">From pixel-level to semantic — spanning the visual hierarchy</text>
+
+  <!-- ═══ LOW-LEVEL (layers 1–3) ═══ -->
+  <text x="30" y="80" class="section-label" fill="#3a8fb7">Low-level — pixel properties (layers 1–3)</text>
+
+  <rect x="30" y="90" width="170" height="72" rx="6" fill="#f0f7fb" stroke="#c4dfe9" stroke-width="1" filter="url(#shadow)"/>
+  <text x="45" y="112" class="feat-name">Hue Contrast</text>
+  <text x="45" y="126" class="feat-desc">Color variety across the image —</text>
+  <text x="45" y="138" class="feat-desc">chromatic range and opposition</text>
+  <rect x="45" y="148" width="60" height="4" rx="2" fill="#3a8fb7" opacity="0.4"/>
+
+  <rect x="210" y="90" width="170" height="72" rx="6" fill="#f0f7fb" stroke="#c4dfe9" stroke-width="1" filter="url(#shadow)"/>
+  <text x="225" y="112" class="feat-name">Brightness Contrast</text>
+  <text x="225" y="126" class="feat-desc">Luminance range — dark-to-light</text>
+  <text x="225" y="138" class="feat-desc">span, chiaroscuro intensity</text>
+  <rect x="225" y="148" width="42" height="4" rx="2" fill="#3a8fb7" opacity="0.4"/>
+
+  <rect x="390" y="90" width="170" height="72" rx="6" fill="#f0f7fb" stroke="#c4dfe9" stroke-width="1" filter="url(#shadow)"/>
+  <text x="405" y="112" class="feat-name">Sharpness</text>
+  <text x="405" y="126" class="feat-desc">Edge density and clarity — crisp</text>
+  <text x="405" y="138" class="feat-desc">detail vs. atmospheric softness</text>
+  <rect x="405" y="148" width="75" height="4" rx="2" fill="#3a8fb7" opacity="0.4"/>
+
+  <!-- ═══ MID-LEVEL (layers 4–8) ═══ -->
+  <text x="30" y="192" class="section-label" fill="#c9963a">Mid-level — composition (layers 4–8)</text>
+
+  <rect x="30" y="202" width="130" height="72" rx="6" fill="#fff8f0" stroke="#e8d4b8" stroke-width="1" filter="url(#shadow)"/>
+  <text x="45" y="224" class="feat-name">Segment Size</text>
+  <text x="45" y="238" class="feat-desc">Scale of largest visual</text>
+  <text x="45" y="250" class="feat-desc">region in the image</text>
+  <rect x="45" y="260" width="30" height="4" rx="2" fill="#c9963a" opacity="0.4"/>
+
+  <rect x="170" y="202" width="130" height="72" rx="6" fill="#fff8f0" stroke="#e8d4b8" stroke-width="1" filter="url(#shadow)"/>
+  <text x="185" y="224" class="feat-name">Saturation</text>
+  <text x="185" y="238" class="feat-desc">Color intensity of the</text>
+  <text x="185" y="250" class="feat-desc">dominant region</text>
+  <rect x="185" y="260" width="50" height="4" rx="2" fill="#c9963a" opacity="0.4"/>
+
+  <rect x="310" y="202" width="130" height="72" rx="6" fill="#fff8f0" stroke="#e8d4b8" stroke-width="1" filter="url(#shadow)"/>
+  <text x="325" y="224" class="feat-name">Blur Contrast</text>
+  <text x="325" y="238" class="feat-desc">Difference in focus across</text>
+  <text x="325" y="250" class="feat-desc">regions — depth of field</text>
+  <rect x="325" y="260" width="38" height="4" rx="2" fill="#c9963a" opacity="0.4"/>
+
+  <rect x="450" y="202" width="130" height="72" rx="6" fill="#fff8f0" stroke="#e8d4b8" stroke-width="1" filter="url(#shadow)"/>
+  <text x="465" y="224" class="feat-name">Vertical Position</text>
+  <text x="465" y="238" class="feat-desc">Where the visual weight</text>
+  <text x="465" y="250" class="feat-desc">sits — high vs. grounded</text>
+  <rect x="465" y="260" width="55" height="4" rx="2" fill="#c9963a" opacity="0.4"/>
+
+  <rect x="590" y="202" width="130" height="72" rx="6" fill="#fff8f0" stroke="#e8d4b8" stroke-width="1" filter="url(#shadow)"/>
+  <text x="605" y="224" class="feat-name">Aspect Ratio</text>
+  <text x="605" y="238" class="feat-desc">Image proportions —</text>
+  <text x="605" y="250" class="feat-desc">wide vs. tall vs. square</text>
+  <rect x="605" y="260" width="22" height="4" rx="2" fill="#c9963a" opacity="0.4"/>
+
+  <rect x="730" y="202" width="140" height="72" rx="6" fill="#fff8f0" stroke="#e8d4b8" stroke-width="1" filter="url(#shadow)"/>
+  <text x="745" y="224" class="feat-name">Person Presence</text>
+  <text x="745" y="238" class="feat-desc">Human figure detection —</text>
+  <text x="745" y="250" class="feat-desc">portrait vs. landscape</text>
+  <rect x="745" y="260" width="35" height="4" rx="2" fill="#c9963a" opacity="0.4"/>
+
+  <!-- ═══ HIGH-LEVEL (layers 9+) ═══ -->
+  <text x="30" y="308" class="section-label" fill="#7c5cbf">High-level — semantic (layers 9+)</text>
+
+  <rect x="30" y="318" width="170" height="72" rx="6" fill="#f5f0fb" stroke="#d4c4e9" stroke-width="1" filter="url(#shadow)"/>
+  <text x="45" y="340" class="feat-name">Concreteness</text>
+  <text x="45" y="354" class="feat-desc">Representational vs. abstract —</text>
+  <text x="45" y="366" class="feat-desc">how recognizable are the objects</text>
+  <rect x="45" y="376" width="56" height="4" rx="2" fill="#7c5cbf" opacity="0.4"/>
+
+  <rect x="210" y="318" width="170" height="72" rx="6" fill="#f5f0fb" stroke="#d4c4e9" stroke-width="1" filter="url(#shadow)"/>
+  <text x="225" y="340" class="feat-name">Dynamics</text>
+  <text x="225" y="354" class="feat-desc">Sense of motion and energy —</text>
+  <text x="225" y="366" class="feat-desc">still vs. active composition</text>
+  <rect x="225" y="376" width="44" height="4" rx="2" fill="#7c5cbf" opacity="0.4"/>
+
+  <rect x="390" y="318" width="170" height="72" rx="6" fill="#f5f0fb" stroke="#d4c4e9" stroke-width="1" filter="url(#shadow)"/>
+  <text x="405" y="340" class="feat-name">Temperature</text>
+  <text x="405" y="354" class="feat-desc">Emotional warmth vs. coolness —</text>
+  <text x="405" y="366" class="feat-desc">inviting vs. austere</text>
+  <rect x="405" y="376" width="66" height="4" rx="2" fill="#7c5cbf" opacity="0.4"/>
+
+  <rect x="570" y="318" width="170" height="72" rx="6" fill="#f5f0fb" stroke="#d4c4e9" stroke-width="1" filter="url(#shadow)"/>
+  <text x="585" y="340" class="feat-name">Valence</text>
+  <text x="585" y="354" class="feat-desc">Positive vs. negative affect —</text>
+  <text x="585" y="366" class="feat-desc">pleasant vs. unsettling</text>
+  <rect x="585" y="376" width="52" height="4" rx="2" fill="#7c5cbf" opacity="0.4"/>
+
+  <!-- ═══ BOTTOM ═══ -->
+  <line x1="30" y1="420" x2="870" y2="420" stroke="#f0f0f0" stroke-width="1"/>
+  <text x="30" y="442" class="cite">Brain imaging (2023) confirms: these features map directly onto stages of the ventral visual stream.</text>
+  <text x="870" y="442" text-anchor="end" style="font-size:9px; fill:#888;">~45% of preference variance explained across individuals</text>
+  <text x="870" y="458" text-anchor="end" class="cite">Iigaya et al., Nature Human Behaviour 5(6):743–755, 2021</text>
+</svg>
+</body>
+</html>

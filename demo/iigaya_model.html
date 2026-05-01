@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body { margin: 0; background: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; padding: 0; }
+svg { font-family: -apple-system, 'Helvetica Neue', sans-serif; width: 100%; height: 100%; }
+.title { font-size: 16px; font-weight: 600; fill: #1a1a1a; }
+.subtitle { font-size: 11px; fill: #777; }
+.box-label { font-size: 11px; font-weight: 600; fill: #1a1a1a; }
+.box-sub { font-size: 9px; fill: #555; font-style: italic; }
+.dim { font-size: 8.5px; fill: #777; font-family: 'SF Mono', 'Menlo', monospace; }
+.section-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+.cite { font-size: 9px; fill: #999; font-style: italic; }
+.big-num { font-size: 32px; font-weight: 600; fill: #2a8ab0; }
+.big-label { font-size: 10px; fill: #666; }
+</style>
+</head>
+<body>
+<svg viewBox="5 20 895 420" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 7" refX="9" refY="3.5" markerWidth="8" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="none" stroke="#ccc" stroke-width="1"/>
+    </marker>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.06"/>
+    </filter>
+  </defs>
+
+  <!-- Title -->
+  <text x="450" y="36" text-anchor="middle" class="subtitle">Image → CNN hierarchy → 13 features → weighted sum → predicted preference</text>
+
+  <!-- ═══ INPUT IMAGE ═══ -->
+  <text x="60" y="80" text-anchor="middle" class="section-label" fill="#c9963a">Input</text>
+  <rect x="15" y="92" width="90" height="90" rx="6" fill="#fff8f0" stroke="#e8d4b8" stroke-width="1" filter="url(#shadow)"/>
+  <text x="60" y="132" text-anchor="middle" class="box-label">Any</text>
+  <text x="60" y="146" text-anchor="middle" class="box-label">Painting</text>
+  <text x="60" y="164" text-anchor="middle" class="box-sub">224 × 224</text>
+
+  <!-- Arrow input → CNN -->
+  <line x1="105" y1="137" x2="145" y2="137" stroke="#ccc" stroke-width="1" marker-end="url(#arrow)"/>
+
+  <!-- ═══ CNN HIERARCHY ═══ -->
+  <text x="290" y="80" text-anchor="middle" class="section-label" fill="#3a8fb7">VGG-16 Feature Hierarchy</text>
+
+  <!-- Layer boxes — getting deeper blue -->
+  <rect x="150" y="95" width="60" height="84" rx="6" fill="#f0f7fb" stroke="#c4dfe9" stroke-width="1" filter="url(#shadow)"/>
+  <text x="180" y="120" text-anchor="middle" style="font-size:9px; font-weight:600; fill:#3a8fb7;">L 1–3</text>
+  <text x="180" y="135" text-anchor="middle" class="box-sub">Edges</text>
+  <text x="180" y="148" text-anchor="middle" class="box-sub">Gradients</text>
+  <text x="180" y="168" text-anchor="middle" class="dim">64–256 ch</text>
+
+  <rect x="220" y="95" width="60" height="84" rx="6" fill="#e4f0f7" stroke="#b0d4e4" stroke-width="1" filter="url(#shadow)"/>
+  <text x="250" y="120" text-anchor="middle" style="font-size:9px; font-weight:600; fill:#3a8fb7;">L 4–8</text>
+  <text x="250" y="135" text-anchor="middle" class="box-sub">Textures</text>
+  <text x="250" y="148" text-anchor="middle" class="box-sub">Patterns</text>
+  <text x="250" y="168" text-anchor="middle" class="dim">256–512 ch</text>
+
+  <rect x="290" y="95" width="60" height="84" rx="6" fill="#d4e6f0" stroke="#98c4d8" stroke-width="1" filter="url(#shadow)"/>
+  <text x="320" y="120" text-anchor="middle" style="font-size:9px; font-weight:600; fill:#3a8fb7;">L 9–12</text>
+  <text x="320" y="135" text-anchor="middle" class="box-sub">Parts</text>
+  <text x="320" y="148" text-anchor="middle" class="box-sub">Objects</text>
+  <text x="320" y="168" text-anchor="middle" class="dim">512 ch</text>
+
+  <rect x="360" y="95" width="60" height="84" rx="6" fill="#c0d8e8" stroke="#80b4cc" stroke-width="1" filter="url(#shadow)"/>
+  <text x="390" y="120" text-anchor="middle" style="font-size:9px; font-weight:600; fill:#3a8fb7;">L 13+</text>
+  <text x="390" y="135" text-anchor="middle" class="box-sub">Meaning</text>
+  <text x="390" y="148" text-anchor="middle" class="box-sub">Context</text>
+  <text x="390" y="168" text-anchor="middle" class="dim">512 ch</text>
+
+  <!-- Depth arrow under CNN -->
+  <line x1="150" y1="192" x2="420" y2="192" stroke="#ddd" stroke-width="1" marker-end="url(#arrow)"/>
+  <text x="150" y="206" class="dim" text-anchor="start">early vision</text>
+  <text x="420" y="206" class="dim" text-anchor="end">higher cognition</text>
+
+  <!-- Arrow CNN → features -->
+  <line x1="420" y1="137" x2="460" y2="137" stroke="#ccc" stroke-width="1" marker-end="url(#arrow)"/>
+
+  <!-- ═══ 13 FEATURES ═══ -->
+  <text x="580" y="80" text-anchor="middle" class="section-label" fill="#e8573a">13 Aesthetic Features</text>
+
+  <!-- Feature bars — grouped by depth -->
+  <!-- Low-level (blue tint) -->
+  <rect x="465" y="92" width="230" height="16" rx="3" fill="#f0f7fb" stroke="#c4dfe9" stroke-width="0.5"/>
+  <text x="472" y="103" style="font-size:8px; fill:#1a1a1a;">Hue Contrast</text>
+  <rect x="570" y="95" width="80" height="10" rx="2" fill="#c4dfe9" opacity="0.7"/>
+
+  <rect x="465" y="111" width="230" height="16" rx="3" fill="#f0f7fb" stroke="#c4dfe9" stroke-width="0.5"/>
+  <text x="472" y="122" style="font-size:8px; fill:#1a1a1a;">Brightness Contrast</text>
+  <rect x="570" y="114" width="55" height="10" rx="2" fill="#c4dfe9" opacity="0.7"/>
+
+  <rect x="465" y="130" width="230" height="16" rx="3" fill="#f0f7fb" stroke="#c4dfe9" stroke-width="0.5"/>
+  <text x="472" y="141" style="font-size:8px; fill:#1a1a1a;">Sharpness</text>
+  <rect x="570" y="133" width="95" height="10" rx="2" fill="#c4dfe9" opacity="0.7"/>
+
+  <!-- Mid-level (warm tint) -->
+  <rect x="465" y="152" width="230" height="16" rx="3" fill="#fff8f0" stroke="#e8d4b8" stroke-width="0.5"/>
+  <text x="472" y="163" style="font-size:8px; fill:#1a1a1a;">Segment Size</text>
+  <rect x="570" y="155" width="40" height="10" rx="2" fill="#e8d4b8" opacity="0.7"/>
+
+  <rect x="465" y="171" width="230" height="16" rx="3" fill="#fff8f0" stroke="#e8d4b8" stroke-width="0.5"/>
+  <text x="472" y="182" style="font-size:8px; fill:#1a1a1a;">Saturation</text>
+  <rect x="570" y="174" width="65" height="10" rx="2" fill="#e8d4b8" opacity="0.7"/>
+
+  <rect x="465" y="190" width="230" height="16" rx="3" fill="#fff8f0" stroke="#e8d4b8" stroke-width="0.5"/>
+  <text x="472" y="201" style="font-size:8px; fill:#1a1a1a;">Blur Contrast</text>
+  <rect x="570" y="193" width="50" height="10" rx="2" fill="#e8d4b8" opacity="0.7"/>
+
+  <rect x="465" y="209" width="230" height="16" rx="3" fill="#fff8f0" stroke="#e8d4b8" stroke-width="0.5"/>
+  <text x="472" y="220" style="font-size:8px; fill:#1a1a1a;">Vertical Position</text>
+  <rect x="570" y="212" width="70" height="10" rx="2" fill="#e8d4b8" opacity="0.7"/>
+
+  <rect x="465" y="228" width="230" height="16" rx="3" fill="#fff8f0" stroke="#e8d4b8" stroke-width="0.5"/>
+  <text x="472" y="239" style="font-size:8px; fill:#1a1a1a;">Aspect Ratio</text>
+  <rect x="570" y="231" width="30" height="10" rx="2" fill="#e8d4b8" opacity="0.7"/>
+
+  <rect x="465" y="247" width="230" height="16" rx="3" fill="#fff8f0" stroke="#e8d4b8" stroke-width="0.5"/>
+  <text x="472" y="258" style="font-size:8px; fill:#1a1a1a;">Person Presence</text>
+  <rect x="570" y="250" width="45" height="10" rx="2" fill="#e8d4b8" opacity="0.7"/>
+
+  <!-- High-level (violet tint) -->
+  <rect x="465" y="269" width="230" height="16" rx="3" fill="#f5f0fb" stroke="#d4c4e9" stroke-width="0.5"/>
+  <text x="472" y="280" style="font-size:8px; fill:#1a1a1a;">Concreteness</text>
+  <rect x="570" y="272" width="72" height="10" rx="2" fill="#d4c4e9" opacity="0.7"/>
+
+  <rect x="465" y="288" width="230" height="16" rx="3" fill="#f5f0fb" stroke="#d4c4e9" stroke-width="0.5"/>
+  <text x="472" y="299" style="font-size:8px; fill:#1a1a1a;">Dynamics</text>
+  <rect x="570" y="291" width="58" height="10" rx="2" fill="#d4c4e9" opacity="0.7"/>
+
+  <rect x="465" y="307" width="230" height="16" rx="3" fill="#f5f0fb" stroke="#d4c4e9" stroke-width="0.5"/>
+  <text x="472" y="318" style="font-size:8px; fill:#1a1a1a;">Temperature</text>
+  <rect x="570" y="310" width="85" height="10" rx="2" fill="#d4c4e9" opacity="0.7"/>
+
+  <rect x="465" y="326" width="230" height="16" rx="3" fill="#f5f0fb" stroke="#d4c4e9" stroke-width="0.5"/>
+  <text x="472" y="337" style="font-size:8px; fill:#1a1a1a;">Valence</text>
+  <rect x="570" y="329" width="68" height="10" rx="2" fill="#d4c4e9" opacity="0.7"/>
+
+  <!-- Depth key -->
+  <rect x="465" y="354" width="10" height="10" rx="2" fill="#f0f7fb" stroke="#c4dfe9" stroke-width="0.5"/>
+  <text x="480" y="363" class="dim">Low-level (pixel)</text>
+  <rect x="560" y="354" width="10" height="10" rx="2" fill="#fff8f0" stroke="#e8d4b8" stroke-width="0.5"/>
+  <text x="575" y="363" class="dim">Mid-level (composition)</text>
+  <rect x="690" y="354" width="10" height="10" rx="2" fill="#f5f0fb" stroke="#d4c4e9" stroke-width="0.5"/>
+  <text x="705" y="363" class="dim">High-level (semantic)</text>
+
+  <!-- Arrow features → prediction -->
+  <line x1="695" y1="215" x2="730" y2="215" stroke="#ccc" stroke-width="1" marker-end="url(#arrow)"/>
+
+  <!-- ═══ WEIGHTED SUM ═══ -->
+  <rect x="735" y="120" width="60" height="72" rx="6" fill="#f0f7f0" stroke="#c4dfc4" stroke-width="1" filter="url(#shadow)"/>
+  <text x="765" y="145" text-anchor="middle" style="font-size:20px; fill:#3a9e6e;">Σ</text>
+  <text x="765" y="165" text-anchor="middle" class="box-sub">weighted</text>
+  <text x="765" y="178" text-anchor="middle" class="box-sub">sum</text>
+
+  <!-- Weights annotation below -->
+  <rect x="735" y="200" width="60" height="32" rx="4" fill="#fafafa" stroke="#d4d0c8" stroke-width="0.5"/>
+  <text x="765" y="214" text-anchor="middle" style="font-size:8px; fill:#888;">w per</text>
+  <text x="765" y="226" text-anchor="middle" style="font-size:8px; fill:#888;">person</text>
+
+  <!-- Arrow sum → result -->
+  <line x1="795" y1="155" x2="825" y2="155" stroke="#ccc" stroke-width="1" marker-end="url(#arrow)"/>
+
+  <!-- ═══ PREDICTION ═══ -->
+  <rect x="830" y="105" width="60" height="100" rx="6" fill="#fdf2ef" stroke="#e8c4b8" stroke-width="1" filter="url(#shadow)"/>
+  <text x="860" y="138" text-anchor="middle" class="big-num">r</text>
+  <text x="860" y="158" text-anchor="middle" style="font-size:18px; font-weight:600; fill:#e8573a;">≈ .45</text>
+  <text x="860" y="180" text-anchor="middle" class="box-sub">preference</text>
+  <text x="860" y="193" text-anchor="middle" class="box-sub">predicted</text>
+
+  <!-- ═══ BOTTOM ANNOTATIONS ═══ -->
+  <line x1="30" y1="385" x2="870" y2="385" stroke="#f0f0f0" stroke-width="1"/>
+
+  <text x="30" y="405" class="cite">Iigaya et al., Nature Human Behaviour 5(6):743–755, 2021</text>
+  <text x="30" y="420" class="cite">Brain imaging validation: Iigaya et al., Nature Communications, 2023</text>
+
+  <text x="870" y="405" text-anchor="end" style="font-size:9px; fill:#666;">Individual profiles from ~20 ratings</text>
+  <text x="870" y="420" text-anchor="end" style="font-size:9px; fill:#666;">Three stable taste clusters across population</text>
+</svg>
+</body>
+</html>
