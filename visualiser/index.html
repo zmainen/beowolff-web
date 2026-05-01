@@ -759,7 +759,10 @@ function draw() {
   ctx.fillRect(0, 0, W, H);
   if (!coords) return;
 
-  const pointSize = Math.max(0.8, Math.min(5, 2 * Math.sqrt(zoom / 10)));
+  const pointSize = Math.max(0.8, Math.min(8, 2 * Math.sqrt(zoom / 10)));
+  // At overview zoom with sprites, limit how many we draw per frame
+  const useSprites = spritesReady && pointSize >= 4;
+  const maxSpritesPerFrame = useSprites ? 20000 : Infinity;
 
   const metaLoaded = meta.length >= N;
   for (let i = 0; i < N; i++) {
@@ -811,11 +814,11 @@ function draw() {
 
     // Draw as sprite thumbnail if available and large enough, otherwise dot
     const drawSize = Math.max(2, size);
-    if (spritesReady && spriteMap[i] && !dimmed) {
+    if (useSprites && spriteMap[i] && !dimmed && maxSpritesPerFrame > 0) {
       const sp = spriteMap[i];
       const sheet = spriteSheets[sp.s];
       if (sheet) {
-        const renderSize = Math.max(drawSize, 3);
+        const renderSize = Math.max(drawSize, 4);
         ctx.globalAlpha = alpha;
         ctx.drawImage(sheet, sp.u, sp.v, 8, 8, sx - renderSize/2, sy - renderSize/2, renderSize, renderSize);
         ctx.globalAlpha = 1;
@@ -930,7 +933,7 @@ window.addEventListener("mousemove", (e) => {
     cx -= dx / zoom; cy += dy / zoom;
     dragX = e.clientX; dragY = e.clientY;
     hideTooltip();
-    draw();
+    requestDraw();
     return;
   }
 
@@ -975,7 +978,7 @@ canvas.addEventListener("wheel", (e) => {
   zoom *= factor;
   cx = wx - (mx - W/2) / zoom;
   cy = wy + (my - H/2) / zoom;
-  draw();
+  requestDraw();
 }, { passive: false });
 
 // Touch support
@@ -1252,11 +1255,20 @@ async function loadSprites() {
     }
 
     spritesReady = true;
-    console.log("Sprites ready!");
+    console.log("Sprites ready! sheets=" + spriteSheets.length + " map=" + spriteMap.length);
+    document.getElementById("count").textContent = N.toLocaleString() + " works · sprites loaded";
     draw();
   } catch(e) {
     console.log("Sprites not available:", e);
+    document.getElementById("count").textContent = N.toLocaleString() + " works · sprites failed: " + e.message;
   }
+}
+
+let drawPending = false;
+function requestDraw() {
+  if (drawPending) return;
+  drawPending = true;
+  requestAnimationFrame(() => { drawPending = false; draw(); });
 }
 
 function zoomIn() { zoom *= 1.5; draw(); }
