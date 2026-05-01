@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rasa — Demo — 2026-05-01 v2</title>
+<title>Rasa — Demo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@300;400;500&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
@@ -18,7 +18,6 @@
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { height: 100%; overflow: hidden; background: var(--black); }
-
 .deck { position: absolute; width: 1280px; height: 720px; top: 50%; left: 50%; transform-origin: center center; }
 .slide {
   position: absolute; top: 0; left: 0; width: 1280px; height: 720px;
@@ -32,17 +31,13 @@ html, body { height: 100%; overflow: hidden; background: var(--black); }
 .slide[data-a="pool"]::before   { background: var(--pool); }
 .slide[data-a="sun"]::before    { background: var(--sun); }
 .slide[data-a="green"]::before  { background: var(--green); }
-
 .sb { flex: 1; padding: 24px 44px 24px; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; }
-
 .lbl { font-family: var(--mono); font-size: 14px; font-weight: 300; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 5px; }
 .lbl.violet { color: var(--violet); } .lbl.coral { color: var(--coral); }
 .lbl.pool { color: var(--pool); } .lbl.sun { color: var(--sun); } .lbl.green { color: var(--green); }
-
 h1 { font-family: var(--serif); font-size: 72px; font-weight: 400; letter-spacing: -0.02em; line-height: 1.1; color: var(--black); margin-bottom: 14px; }
 h2 { font-family: var(--serif); font-size: 52px; font-weight: 400; line-height: 1.1; color: var(--black); margin-bottom: 12px; }
 h3 { font-family: var(--sans); font-size: 24px; font-weight: 600; color: var(--black); margin-bottom: 4px; }
-
 ul.b { list-style: none; margin: 0; padding: 0; }
 ul.b li {
   font-family: var(--sans); font-size: 30px; line-height: 1.4; color: #444;
@@ -50,7 +45,6 @@ ul.b li {
 }
 ul.b li::before { content: ''; position: absolute; left: 0; top: 22px; width: 9px; height: 9px; border-radius: 50%; background: var(--border); }
 ul.b li strong { color: var(--black); font-weight: 600; }
-
 .cards { display: flex; gap: 10px; }
 .card {
   flex: 1; background: var(--white); border: 1px solid var(--border);
@@ -64,21 +58,16 @@ ul.b li strong { color: var(--black); font-weight: 600; }
 .card[data-a="green"]::before  { background: var(--green); }
 .card h3 { font-size: 24px; margin-bottom: 4px; }
 .card p { font-family: var(--sans); font-size: 21px; line-height: 1.35; color: #444; }
-
 .em { border-left: 4px solid var(--line); padding-left: 22px; margin: 14px 0; }
 .em p { font-family: var(--body-serif); font-size: 32px; line-height: 1.35; color: var(--black); font-style: italic; }
-
 .asset-frame { flex: 1; border: 1px solid var(--border); background: #fff; min-height: 0; }
 .spacer { flex: 1; }
 .tag { font-family: var(--mono); font-size: 14px; font-weight: 300; letter-spacing: 0.12em; text-transform: uppercase; color: #888; }
-
 .cols { display: flex; gap: 32px; flex: 1; min-height: 0; }
 .col { flex: 1; display: flex; flex-direction: column; }
-
 .bio { margin-bottom: 6px; }
 .bio-name { font-family: var(--serif); font-size: 26px; margin-bottom: 2px; }
 .bio-role { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #888; margin-bottom: 4px; }
-
 #counter { position: fixed; bottom: 8px; right: 14px; font-family: var(--mono); font-size: 12px; color: #666; z-index: 100; pointer-events: none; }
 .title-slide .sb { justify-content: center; padding: 48px 64px; }
 .title-slide h1 { font-size: 80px; margin-bottom: 18px; }
@@ -88,42 +77,33 @@ ul.b li strong { color: var(--black); font-weight: 600; }
 <div id="counter"></div>
 <div class="deck">
 
-<!-- 1 ─ TITLE ──────────────────────────────────────────────── -->
 <div class="slide title-slide active" data-a="violet">
   <div class="sb">
     <h1>Rasa</h1>
     <p class="tag">A Foundation Embedding for Art</p>
     <div class="em"><p>Understanding what appeals to people at the level of how they perceive the world.</p></div>
     <div class="spacer"></div>
-    <div style="font-family: var(--mono); font-size: 14px; color: #999; line-height: 1.8;">
-      Zachary F. Mainen &middot; Champalimaud Centre for the Unknown<br>rasa.haak.world
-    </div>
+    <div style="font-family: var(--mono); font-size: 14px; color: #999; line-height: 2;">Zachary F. Mainen &middot; Champalimaud Centre for the Unknown</div>
+    <div style="font-family: var(--mono); font-size: 14px; color: #999; line-height: 2;">rasa.haak.world</div>
   </div>
 </div>
-
-<!-- 2 ─ WHO WE ARE ─────────────────────────────────────────── -->
 <div class="slide" data-a="green">
   <div class="sb">
-    <div class="lbl green">The team</div>
+    <div class="lbl green"></div>
     <h2>Who we are</h2>
     <div class="cols" style="gap: 48px;">
       <div class="col">
-        <div class="bio">
-          <div class="bio-name">Zachary F. Mainen</div>
-          <div class="bio-role">Champalimaud Centre for the Unknown &middot; Lisbon</div>
-        </div>
+        <div class="bio"><div class="bio-name">Zachary F. Mainen</div>
+        <div class="bio-role">Champalimaud Centre for the Unknown &middot; Lisbon</div></div>
         <ul class="b" style="font-size: 18px;">
-          <li><strong>Serotonin, decision-making, perception</strong></li>
-          <li>Co-founder, <strong>International Brain Laboratory</strong></li>
-          <li>Building with <strong>agentic AI</strong> since 2022 &mdash; HAAK runs Rasa</li>
+          <li>Serotonin, decision-making, perception</li>
+          <li>Building with agentic AI</li>
           <li><strong>Latent States</strong> &mdash; experience through science and art</li>
         </ul>
       </div>
       <div class="col">
-        <div class="bio">
-          <div class="bio-name">Kyo Iigaya</div>
-          <div class="bio-role">Columbia &middot; Psychiatry &middot; Zuckerman Institute</div>
-        </div>
+        <div class="bio"><div class="bio-name">Kyo Iigaya</div>
+        <div class="bio-role">Columbia &middot; Psychiatry &middot; Zuckerman Institute</div></div>
         <ul class="b" style="font-size: 18px;">
           <li><strong>Nature Human Behaviour 2021</strong> &mdash; 13 features predict aesthetic preference</li>
           <li>Trained at UCL and Caltech in computational neuroscience</li>
@@ -131,157 +111,136 @@ ul.b li strong { color: var(--black); font-weight: 600; }
         </ul>
       </div>
     </div>
-    <img src="latent-states.jpg" alt="Latent States — Atavic Forest" style="width: 100%; height: 100px; object-fit: cover; border: 1px solid var(--border);" onerror="this.style.display='none'">
+    <img src="latent-states.jpg" style="width: 100%; height: 100px; object-fit: cover; border: 1px solid var(--border);" onerror="this.style.display='none'">
   </div>
 </div>
-
-<!-- 3 ─ THE BOT ────────────────────────────────────────────── -->
 <div class="slide" data-a="coral">
   <div class="sb">
-    <div class="lbl coral">Live demo</div>
+    <div class="lbl coral"></div>
     <h2>The bot is an agent</h2>
     <div style="display: flex; gap: 32px; flex: 1; min-height: 0;">
       <div style="flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
         <ul class="b">
-          <li><strong>An AI agent</strong>, not a chatbot &mdash; it reasons, then acts</li>
-          <li>Searches <strong>598,000 works</strong> across four museum collections</li>
-          <li>Talks like someone who knows about art</li>
-          <li><strong>Remembers you</strong> &mdash; learns your taste from every interaction</li>
+          <li>AI + machine learning proof of concept</li>
+          <li>Trained on 600k works across four museum collections</li>
+          <li>Persistent memory for preferences</li>
         </ul>
         <div class="cards">
-          <div class="card" data-a="coral"><h3>Built in weeks</h3><p>On public data. Live on Telegram right now.</p></div>
+          <div class="card" data-a="coral"><h3>Built in days with HAAK (open source)</h3><p>Connected to knowledge base & agent governance</p></div>
           <div class="card" data-a="sun"><h3>598k works</h3><p>Rijksmuseum, WikiArt, Met, National Gallery of Art.</p></div>
         </div>
       </div>
-      <img src="richter.jpg" alt="Richter — Woman Descending the Staircase" style="height: 100%; max-width: 280px; object-fit: contain; border: 1px solid var(--border);" onerror="this.style.display='none'">
+      <img src="richter.jpg" style="height: 100%; max-width: 280px; object-fit: contain; border: 1px solid var(--border);" onerror="this.style.display='none'">
     </div>
   </div>
 </div>
-
-<!-- 4 ─ THE LANDSCAPE ──────────────────────────────────────── -->
 <div class="slide" data-a="sun">
-  <div class="sb" style="padding-bottom: 8px;">
-    <div class="lbl sun">Live demo</div>
+  <div class="sb">
+    <div class="lbl sun"></div>
     <h2>598,000 works as a landscape</h2>
     <div style="display: flex; gap: 16px; flex: 1; min-height: 0;">
       <div style="flex: 0 0 40%; display: flex; flex-direction: column; justify-content: space-between;">
         <ul class="b" style="font-size: 26px;">
-          <li>Every dot is an artwork. Position = <strong>aesthetic similarity</strong></li>
-          <li>Neighborhoods emerge on their own</li>
-          <li>Zoom in to see the paintings</li>
+          <li>Every dot is an artwork. Position = <strong>visual similarity</strong></li>
+          <li>Pan and zoom &mdash; dots become thumbnails become paintings</li>
+          <li>No labels, no categories &mdash; structure from the images themselves</li>
         </ul>
         <div class="cards" style="flex-direction: column;">
-          <div class="card" data-a="sun"><h3>Not a taxonomy</h3><p>Art Genome curates by hand. Rasa learns from the art.</p></div>
-          <div class="card" data-a="coral"><h3>Structure from data</h3><p>Nobody told it what Impressionism is.</p></div>
+          <div class="card" data-a="pool"><h3>SigLIP vision model</h3><p>Pretrained on millions of images. Understands content, style, subject &mdash; 768 dimensions per work.</p></div>
+          <div class="card" data-a="green"><h3>Public data only</h3><p>Four museum collections. No user behavior yet &mdash; that's the next step.</p></div>
         </div>
       </div>
-      <iframe id="viz-frame" src="../visualiser/index.html" style="flex: 1; border: 1px solid var(--border); background: var(--white); min-height: 0;"></iframe>
+      <iframe src="../visualiser/index.html" style="flex: 1; border: 1px solid var(--border); background: var(--white); min-height: 0;"></iframe>
     </div>
   </div>
 </div>
-
-<!-- 5 ─ WHAT DOES SIMILAR MEAN? ────────────────────────────── -->
 <div class="slide" data-a="pool">
   <div class="sb">
-    <div class="lbl pool">The question</div>
+    <div class="lbl pool"></div>
     <h2>What does "similar" mean?</h2>
     <div style="display: flex; gap: 32px; align-items: center; flex: 1; min-height: 0;">
-      <img src="richter.jpg" alt="Richter" style="height: 280px; border: 1px solid var(--border); object-fit: contain;" onerror="this.style.display='none'">
+      <img src="richter.jpg" style="height: 280px; border: 1px solid var(--border); object-fit: contain;" onerror="this.style.display='none'">
       <div style="flex: 1;">
         <ul class="b">
-          <li>The bot says these two are related. <strong>Why?</strong></li>
+          <li>Are these two related? <strong>Why?</strong></li>
           <li>Not the same subject, color, or style</li>
           <li>Something deeper &mdash; but what, exactly?</li>
         </ul>
       </div>
-      <img src="rothko.jpg" alt="Rothko" style="height: 280px; border: 1px solid var(--border); object-fit: contain;">
+      <img src="rothko.jpg" style="height: 280px; border: 1px solid var(--border); object-fit: contain;">
     </div>
     <div class="cards">
-      <div class="card" data-a="pool"><h3>Richter</h3><p>Woman Descending the Staircase, 1965</p></div>
+      <div class="card" data-a="violet"><h3>Richter</h3><p>Woman Descending the Staircase, 1965</p></div>
       <div class="card" data-a="coral"><h3>Rothko</h3><p>Orange, Red, Yellow, 1961</p></div>
     </div>
   </div>
 </div>
-
-<!-- 6 ─ IIGAYA MODEL ───────────────────────────────────────── -->
 <div class="slide" data-a="pool">
-  <div class="sb" style="padding-bottom: 8px;">
-    <div class="lbl pool">The science</div>
+  <div class="sb">
+    <div class="lbl pool"></div>
     <h2>How we measure aesthetic preference</h2>
     <iframe src="iigaya_model.html" class="asset-frame"></iframe>
   </div>
 </div>
-
-<!-- 7 ─ NETWORK ────────────────────────────────────────────── -->
 <div class="slide" data-a="pool">
-  <div class="sb" style="padding-bottom: 8px;">
-    <div class="lbl pool">The science</div>
+  <div class="sb">
+    <div class="lbl pool"></div>
     <h2>What the network sees</h2>
     <iframe src="network_combined.html" class="asset-frame"></iframe>
   </div>
 </div>
-
-<!-- 8 ─ 13 FEATURES ────────────────────────────────────────── -->
 <div class="slide" data-a="pool">
-  <div class="sb" style="padding-bottom: 8px;">
-    <div class="lbl pool">The science</div>
+  <div class="sb">
+    <div class="lbl pool"></div>
     <h2>The 13 aesthetic features</h2>
     <iframe src="iigaya_features.html" class="asset-frame"></iframe>
   </div>
 </div>
-
-<!-- 9 ─ BRAIN ──────────────────────────────────────────────── -->
 <div class="slide" data-a="pool">
-  <div class="sb" style="padding-bottom: 8px;">
-    <div class="lbl pool">The science</div>
+  <div class="sb">
+    <div class="lbl pool"></div>
     <h2>The model mirrors the brain</h2>
     <iframe src="iigaya_brain.html" class="asset-frame"></iframe>
   </div>
 </div>
-
-<!-- 10 ─ YOUR DATA ─────────────────────────────────────────── -->
 <div class="slide" data-a="violet">
   <div class="sb">
-    <div class="lbl violet">Your data</div>
-    <h2>What would you like to see?</h2>
-    <ul class="b" style="font-size: 26px;">
-      <li><strong>Art Genome:</strong> human expertise &mdash; specialists assign categories. Scales with curators</li>
-      <li><strong>Rasa:</strong> sees the art directly. Scales with data</li>
-      <li>Not replacing Art Genome &mdash; <strong>extending it</strong></li>
-    </ul>
-    <div class="cards">
-      <div class="card" data-a="coral"><h3>Learned recommendation</h3><p>One model that sees the art, reads the biography, watches what collectors do.</p></div>
-      <div class="card" data-a="sun"><h3>Personal taste</h3><p>Each collector gets a profile that evolves with their behavior.</p></div>
-      <div class="card" data-a="pool"><h3>Features and price</h3><p>Visual features predict preference. Do they predict market value?</p></div>
-    </div>
-  </div>
-</div>
-
-<!-- 11 ─ ATTRIBUTION + VISION ──────────────────────────────── -->
-<div class="slide" data-a="violet">
-  <div class="sb">
-    <div class="lbl violet">The vision</div>
-    <h2>Who gets paid when art sells</h2>
+    <div class="lbl violet"></div>
+    <h2>What could we explore together?</h2>
     <ul class="b">
-      <li>Every recommendation is <strong>traceable</strong> &mdash; we know which data shaped it</li>
-      <li>Artists get paid for <strong>the taste they teach the model</strong></li>
-      <li>A recommendation engine that answers to <strong>culture, not shareholders</strong></li>
+      <li><strong>Art Genome</strong> encodes expert knowledge &mdash; 1,000+ curated attributes per work</li>
+      <li><strong>SigLIP</strong> discovers structure from the images &mdash; complements what curators label</li>
+      <li><strong>Iigaya</strong> adds a perceptual layer &mdash; how people actually respond to visual features</li>
+      <li>With <strong>collector behavior</strong>, the model learns what matters to each person</li>
     </ul>
     <div class="cards">
-      <div class="card" data-a="pool"><h3>Shapley values</h3><p>Each contributor's actual impact, measured mathematically.</p></div>
-      <div class="card" data-a="green"><h3>HAAK</h3><p>Open-source platform. Every step recorded and auditable.</p></div>
-      <div class="card" data-a="violet"><h3>The internet was supposed to be a museum</h3><p>We're building what it should have been.</p></div>
+      <div class="card" data-a="sun"><h3>Learned recommendation</h3><p>Combine all three signals &mdash; curated, visual, behavioral &mdash; in one model. The architecture Spotify and Pinterest use. Nobody has built it for art.</p></div>
+      <div class="card" data-a="pool"><h3>Do visual features predict price?</h3><p>The Iigaya features predict preference. Do they correlate with market value?</p></div>
     </div>
   </div>
 </div>
-
-<!-- 12 ─ CLOSING ───────────────────────────────────────────── -->
 <div class="slide" data-a="violet">
-  <div class="sb" style="justify-content: center; padding: 48px 64px;">
-    <h1 style="font-size: 56px;">Rasa</h1>
-    <div class="em" style="max-width: 600px;"><p>The science of how people see and value art &mdash; running live, at scale.</p></div>
+  <div class="sb">
+    <div class="lbl violet"></div>
+    <h2>Value attribution</h2>
+    <ul class="b" style="font-size: 26px;">
+      <li>Recommendation can be <strong>traceable</strong> &mdash; which data shaped each result</li>
+      <li>Artists could be paid for <strong>the taste they teach the model</strong></li>
+      <li>Attribution from mathematics, not policy &mdash; measurable through experiment</li>
+    </ul>
+    <div class="cards">
+      <div class="card" data-a="green"><h3>Shapley values</h3><p>A framework from game theory for measuring each contributor's actual impact.</p></div>
+      <div class="card" data-a="violet"><h3>HAAK</h3><p>Open-source platform for agentic AI. Every reasoning step recorded and auditable. Attribution is computable because the infrastructure was designed for it.</p></div>
+    </div>
+  </div>
+</div>
+<div class="slide title-slide" data-a="violet">
+  <div class="sb">
+    <h1>Rasa</h1>
+    <div class="em"><p>The science of how people see and value art &mdash; running live, at scale.</p></div>
     <div class="spacer"></div>
-    <div style="font-family: var(--mono); font-size: 14px; color: #999; line-height: 2;">rasa.haak.world<br>@BeowolffArtBot on Telegram</div>
+    <div style="font-family: var(--mono); font-size: 14px; color: #999; line-height: 2;">rasa.haak.world</div>
+    <div style="font-family: var(--mono); font-size: 14px; color: #999; line-height: 2;">@BeowolffArtBot on Telegram</div>
   </div>
 </div>
 
