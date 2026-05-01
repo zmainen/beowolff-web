@@ -811,11 +811,11 @@ function draw() {
 
     // Draw as sprite thumbnail if available and large enough, otherwise dot
     const drawSize = Math.max(2, size);
-    if (spritesReady && spriteMap[i] && drawSize >= 3 && !dimmed) {
+    if (spritesReady && spriteMap[i] && !dimmed) {
       const sp = spriteMap[i];
       const sheet = spriteSheets[sp.s];
       if (sheet) {
-        const renderSize = Math.max(drawSize, 4);
+        const renderSize = Math.max(drawSize, 3);
         ctx.globalAlpha = alpha;
         ctx.drawImage(sheet, sp.u, sp.v, 8, 8, sx - renderSize/2, sy - renderSize/2, renderSize, renderSize);
         ctx.globalAlpha = 1;
