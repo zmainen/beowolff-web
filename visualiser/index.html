@@ -1221,13 +1221,22 @@ function drawPin() {
 
 async function loadSprites() {
   try {
-    // Try loading sprite map from v2
-    const mapResp = await fetch(`${SOS}/visualiser/v2/sprite_map.json`);
-    if (!mapResp.ok) return; // sprites not built yet
-    spriteMap = await mapResp.json();
-
-    // Figure out how many sheets exist
-    const nSheets = Math.max(...spriteMap.map(m => m.s)) + 1;
+    // Load binary sprite map (5 bytes per entry: sheet, u16, v16)
+    const mapResp = await fetch(`${SOS}/visualiser/v2/sprite_map.bin`);
+    if (!mapResp.ok) return;
+    const buf = new Uint8Array(await mapResp.arrayBuffer());
+    const n = buf.length / 5;
+    spriteMap = new Array(n);
+    let maxSheet = 0;
+    for (let i = 0; i < n; i++) {
+      const off = i * 5;
+      const s = buf[off];
+      const u = buf[off+1] | (buf[off+2] << 8);
+      const v = buf[off+3] | (buf[off+4] << 8);
+      spriteMap[i] = {s, u, v};
+      if (s > maxSheet) maxSheet = s;
+    }
+    const nSheets = maxSheet + 1;
     console.log("Loading %d sprite sheets...", nSheets);
 
     for (let i = 0; i < nSheets; i++) {
