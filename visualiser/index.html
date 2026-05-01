@@ -681,18 +681,8 @@ function switchProjection(proj) {
 }
 
 function setupLandmarks() {
-  const container = document.getElementById("landmarks");
-  container.innerHTML = "";
-  for (const lm of landmarks) {
-    if (lm.count < 3000) continue;
-    const el = document.createElement("div");
-    el.className = "landmark";
-    let label = lm.label.replace(/^prints\s*--\s*/i, "").replace(/^photographs\s*--\s*/i, "");
-    el.textContent = label || "Cluster " + lm.id;
-    el.dataset.x = lm.x;
-    el.dataset.y = lm.y;
-    container.appendChild(el);
-  }
+  // Landmarks disabled — too noisy, not informative enough yet.
+  // Re-enable when we have curated labels rather than auto-generated ones.
 }
 
 function updateLandmarks() {
