@@ -823,7 +823,7 @@ let tipImgLoading = "";
 
 function showTooltip(i, mx, my) {
   const m = meta[i];
-  tipTitle.textContent = m.t || "Untitled";
+  tipTitle.textContent = m.t || "";
   tipArtist.textContent = m.a || "";
   tipExtra.textContent = [m.d, m.m, m.c].filter(Boolean).join(" · ");
 
@@ -868,7 +868,7 @@ function showDetail(i) {
   } else {
     img.style.display = "none";
   }
-  title.textContent = m.t || "Untitled";
+  title.textContent = m.t || "";
   artist.textContent = m.a || "";
   extra.textContent = [m.d, m.m, m.c].filter(Boolean).join(" · ");
   document.getElementById("detail").style.display = "block";
@@ -1111,7 +1111,7 @@ function flyToArtist(indices) {
     if (!m?.ik || !m.ik.startsWith("http")) continue;
     const img = document.createElement("img");
     img.src = m.ik.replace(/!\d+,\d+/, "!128,128");
-    img.title = m.t || "Untitled";
+    img.title = m.t || "";
     img.onclick = () => {
       searchCursor = searchIndices.indexOf(i);
       navigateToWork(i);
