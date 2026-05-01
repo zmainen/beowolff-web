@@ -294,17 +294,7 @@ async function load() {
 
   centerView();
 
-  // Load metadata chunks
-  const chunks = manifest.chunks || [];
-  for (let i = 0; i < chunks.length; i++) {
-    const resp = await fetch(`${BASE}/${chunks[i]}`);
-    meta.push(...await resp.json());
-    fill.style.width = (40 + 50 * (i + 1) / chunks.length) + "%";
-  }
-
-  fill.style.width = "95%";
-
-  // Default: everything on except types in default_off
+  // Set up controls and render dots immediately (before metadata loads)
   const allTypes = Object.keys(manifest.types || {});
   const defaultOff = new Set(manifest.default_off || []);
   activeTypes = new Set(allTypes.filter(t => !defaultOff.has(t)));
@@ -313,11 +303,30 @@ async function load() {
   setupFilters();
   setupProjectionToggle();
   setupLandmarks();
+  buildGrid();
 
   document.getElementById("count").textContent = `${N.toLocaleString()} works`;
   document.getElementById("loading").style.display = "none";
 
-  buildGrid();
+  // Initial draw — dots only, no metadata yet (hover/click won't work until loaded)
+  draw();
+
+  // Stream metadata chunks in background without blocking UI
+  const chunks = manifest.chunks || [];
+  for (let i = 0; i < chunks.length; i++) {
+    const resp = await fetch(`${BASE}/${chunks[i]}`);
+    const text = await resp.text();
+    // Parse in a microtask to avoid blocking
+    await new Promise(resolve => {
+      setTimeout(() => {
+        const chunk = JSON.parse(text);
+        meta.push(...chunk);
+        fill.style.width = (40 + 55 * (i + 1) / chunks.length) + "%";
+        resolve();
+      }, 0);
+    });
+  }
+
   buildArtistIndex();
   draw();
 
@@ -502,11 +511,14 @@ function draw() {
 
   const pointSize = Math.max(0.8, Math.min(5, 2 * Math.sqrt(zoom / 10)));
 
+  const metaLoaded = meta.length >= N;
   for (let i = 0; i < N; i++) {
     const m = meta[i];
-    const tp = m?.tp || m?.c;
-    const corpus = m?.c;
-    if (!activeTypes.has(tp) || !activeCorpora.has(corpus)) continue;
+    if (metaLoaded) {
+      const tp = m?.tp || m?.c;
+      const corpus = m?.c;
+      if (!activeTypes.has(tp) || !activeCorpora.has(corpus)) continue;
+    }
 
     const x = coords[i * 2];
     const y = coords[i * 2 + 1];
@@ -515,7 +527,7 @@ function draw() {
 
     if (sx < -10 || sx > W + 10 || sy < -10 || sy > H + 10) continue;
 
-    const col = TYPE_COLORS[tp] || [128, 128, 128];
+    const col = metaLoaded ? (TYPE_COLORS[m?.tp] || [128, 128, 128]) : [77, 153, 255];
     const isHovered = i === hoveredIdx;
     const isPinned = i === pinnedIdx;
     const isSearched = searchHighlight.has(i);
@@ -531,9 +543,13 @@ function draw() {
     }
 
     ctx.fillStyle = `rgba(${col[0]},${col[1]},${col[2]},${alpha})`;
-    ctx.beginPath();
-    ctx.arc(sx, sy, size / 2, 0, Math.PI * 2);
-    ctx.fill();
+    if (isHovered || isPinned || isSearched) {
+      ctx.beginPath();
+      ctx.arc(sx, sy, size / 2, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.fillRect(sx - size/2, sy - size/2, size, size);
+    }
   }
 
   updateLandmarks();
