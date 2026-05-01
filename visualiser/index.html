@@ -117,7 +117,7 @@ body { background: #0a0a0f; color: #e0e0e0; font-family: -apple-system, BlinkMac
 <div id="help-panel">
   <button class="close" onclick="toggleHelp()">&times;</button>
   <h2>What is this?</h2>
-  <p>Every dot is an artwork from the Rijksmuseum collection. Works that are similar land near each other. The map is computed by projecting high-dimensional representations of each work into two dimensions using UMAP.</p>
+  <p>Every dot is an artwork — nearly 690,000 works from the Rijksmuseum, WikiArt, the Metropolitan Museum of Art, and the National Gallery of Art. Works that are similar land near each other. The map is computed by projecting high-dimensional representations of each work into two dimensions using UMAP.</p>
 
   <h3>Two ways of seeing</h3>
   <p><strong>Semantic (SigLIP)</strong> organizes by what works depict and what tradition they belong to. SigLIP is a vision-language model (Google, 2023) trained on billions of image-text pairs. It learned to encode both what things look like and what they mean — a Vermeer interior and a Hopper interior share a direction (dimly lit room, solitary figure) while differing along others (17th-century Dutch vs. 20th-century American). This is why prints, photographs, paintings, and drawings form distinct continents.</p>
@@ -132,6 +132,7 @@ body { background: #0a0a0f; color: #e0e0e0; font-family: -apple-system, BlinkMac
 
 <div id="controls">
   <div id="projection-toggle"></div>
+  <div id="corpus-toggle" style="margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;"></div>
   <div id="filters"></div>
 </div>
 
@@ -163,6 +164,7 @@ const BASE = `${SOS}/visualiser/v1`;
 
 const TYPE_COLORS = {
   paintings: [230, 77, 77],
+  painting: [230, 77, 77],
   prints: [77, 153, 255],
   photographs: [51, 230, 128],
   drawings: [255, 204, 51],
@@ -171,7 +173,7 @@ const TYPE_COLORS = {
   pastels: [153, 102, 255],
 };
 const TYPE_CSS = {
-  paintings: "#e64d4d", prints: "#4d99ff", photographs: "#33e680",
+  paintings: "#e64d4d", painting: "#e64d4d", prints: "#4d99ff", photographs: "#33e680",
   drawings: "#ffcc33", sculpture: "#e64dB3", miniatures: "#ff8033", pastels: "#9966ff",
 };
 
@@ -188,8 +190,13 @@ let activeProjection = "siglip";
 let cx = 0, cy = 0, zoom = 1;
 let dragging = false, dragX = 0, dragY = 0;
 let activeTypes = new Set();
+let activeCorpora = new Set();
 let hoveredIdx = -1;
 let pinnedIdx = -1;
+
+const CORPUS_DOT_CSS = {
+  rijksmuseum: "#4d99ff", wikiart: "#ff8033", met: "#33e680", nga: "#e64dB3",
+};
 
 // Spatial index for hover
 let gridCells = {};
@@ -239,7 +246,12 @@ async function load() {
 
   fill.style.width = "95%";
 
-  activeTypes = new Set(Object.keys(manifest.types || manifest.corpora));
+  // Default: everything on except types in default_off
+  const allTypes = Object.keys(manifest.types || {});
+  const defaultOff = new Set(manifest.default_off || []);
+  activeTypes = new Set(allTypes.filter(t => !defaultOff.has(t)));
+  activeCorpora = new Set(Object.keys(manifest.corpora || {}));
+  setupCorpusToggle();
   setupFilters();
   setupProjectionToggle();
   setupLandmarks();
@@ -272,6 +284,23 @@ function centerView() {
   zoom = Math.min(W, H) / span * 0.85;
 }
 
+function setupCorpusToggle() {
+  const container = document.getElementById("corpus-toggle");
+  const sorted = Object.entries(manifest.corpora || {}).sort((a,b) => b[1] - a[1]);
+  for (const [corpus, count] of sorted) {
+    const btn = document.createElement("div");
+    btn.className = "ctrl-btn active";
+    const k = count >= 1000 ? `${(count/1000).toFixed(0)}k` : count;
+    btn.innerHTML = `<span class="toggle"></span><span class="dot" style="background:${CORPUS_DOT_CSS[corpus] || '#888'}"></span>${corpus} (${k})`;
+    btn.onclick = () => {
+      if (activeCorpora.has(corpus)) { activeCorpora.delete(corpus); btn.classList.remove("active"); }
+      else { activeCorpora.add(corpus); btn.classList.add("active"); }
+      draw();
+    };
+    container.appendChild(btn);
+  }
+}
+
 function setupFilters() {
   const container = document.getElementById("filters");
   const types = manifest.types || manifest.corpora;
@@ -279,7 +308,7 @@ function setupFilters() {
   const sorted = Object.entries(types).sort((a,b) => b[1] - a[1]);
   for (const [tp, count] of sorted) {
     const btn = document.createElement("div");
-    btn.className = "ctrl-btn active";
+    btn.className = activeTypes.has(tp) ? "ctrl-btn active" : "ctrl-btn";
     btn.dataset.type = tp;
     const k = count >= 1000 ? `${(count/1000).toFixed(0)}k` : count;
     btn.innerHTML = `<span class="toggle"></span><span class="dot" style="background:${TYPE_CSS[tp] || '#888'}"></span>${tp} (${k})`;
@@ -364,7 +393,7 @@ function findNearest(mx, my, threshold) {
   let closest = -1, closestDist = threshold * threshold;
   for (let i = 0; i < N; i++) {
     const tp = meta[i]?.tp || meta[i]?.c;
-    if (!activeTypes.has(tp)) continue;
+    if (!activeTypes.has(tp) || !activeCorpora.has(meta[i]?.c)) continue;
     const sx = (coords[i*2] - cx) * zoom + W/2;
     const sy = (coords[i*2+1] - cy) * -zoom + H/2;
     const dx = sx - mx, dy = sy - my;
@@ -382,8 +411,10 @@ function draw() {
   const pointSize = Math.max(0.8, Math.min(5, 2 * Math.sqrt(zoom / 10)));
 
   for (let i = 0; i < N; i++) {
-    const tp = meta[i]?.tp || meta[i]?.c;
-    if (!activeTypes.has(tp)) continue;
+    const m = meta[i];
+    const tp = m?.tp || m?.c;
+    const corpus = m?.c;
+    if (!activeTypes.has(tp) || !activeCorpora.has(corpus)) continue;
 
     const x = coords[i * 2];
     const y = coords[i * 2 + 1];
