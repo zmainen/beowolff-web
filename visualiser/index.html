@@ -170,6 +170,7 @@ body { background: #0a0a0f; color: #e0e0e0; font-family: -apple-system, BlinkMac
 
 <div id="controls">
   <div id="projection-toggle"></div>
+  <div id="color-mode" style="margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;"></div>
   <div id="corpus-toggle" style="margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;"></div>
   <div id="filters"></div>
 </div>
@@ -237,9 +238,17 @@ let hoveredIdx = -1;
 let pinnedIdx = -1;
 let searchHighlight = new Set();
 
+const CORPUS_COLORS = {
+  rijksmuseum: [77, 153, 255],
+  wikiart: [255, 128, 51],
+  met: [51, 230, 128],
+  nga: [230, 77, 179],
+};
 const CORPUS_DOT_CSS = {
   rijksmuseum: "#4d99ff", wikiart: "#ff8033", met: "#33e680", nga: "#e64dB3",
 };
+
+let colorMode = "type"; // "type" or "corpus"
 
 // Spatial index — grid of cells in data space for fast hover lookup
 let grid = null;
@@ -335,6 +344,7 @@ async function load() {
   // Also add "painting" to active if "paintings" is active (for matching)
   if (activeTypes.has("paintings")) activeTypes.add("painting");
   activeCorpora = new Set(Object.keys(manifest.corpora || {}));
+  setupColorMode();
   setupCorpusToggle();
   setupFilters();
   setupProjectionToggle();
@@ -399,6 +409,24 @@ function centerView() {
   cy = (b.ymin + b.ymax) / 2;
   const span = Math.max(b.xmax - b.xmin, b.ymax - b.ymin);
   zoom = Math.min(W, H) / span * 0.85;
+}
+
+function setupColorMode() {
+  const container = document.getElementById("color-mode");
+  const btnType = document.createElement("div");
+  btnType.className = "ctrl-btn active";
+  btnType.id = "btn-color-type";
+  btnType.innerHTML = '<span class="toggle"></span>Color by medium';
+  btnType.onclick = () => { colorMode = "type"; btnType.classList.add("active"); btnCorpus.classList.remove("active"); draw(); };
+
+  const btnCorpus = document.createElement("div");
+  btnCorpus.className = "ctrl-btn";
+  btnCorpus.id = "btn-color-corpus";
+  btnCorpus.innerHTML = '<span class="toggle"></span>Color by collection';
+  btnCorpus.onclick = () => { colorMode = "corpus"; btnCorpus.classList.add("active"); btnType.classList.remove("active"); draw(); };
+
+  container.appendChild(btnType);
+  container.appendChild(btnCorpus);
 }
 
 function setupCorpusToggle() {
@@ -584,7 +612,9 @@ function draw() {
 
     if (sx < -10 || sx > W + 10 || sy < -10 || sy > H + 10) continue;
 
-    const col = metaLoaded ? (TYPE_COLORS[m?.tp] || [128, 128, 128]) : [77, 153, 255];
+    const col = metaLoaded
+      ? (colorMode === "corpus" ? (CORPUS_COLORS[m?.c] || [128,128,128]) : (TYPE_COLORS[m?.tp] || [128,128,128]))
+      : [77, 153, 255];
     const isHovered = i === hoveredIdx;
     const isPinned = i === pinnedIdx;
     const isSearched = searchHighlight.has(i);
