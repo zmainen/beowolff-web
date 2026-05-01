@@ -89,6 +89,25 @@ body { background: #0a0a0f; color: #e0e0e0; font-family: -apple-system, BlinkMac
 #search-results .result:hover { color: #fff; }
 #search-results .result .count { color: #666; font-size: 11px; }
 
+#gallery {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 12;
+  background: rgba(12,16,26,0.9); border-top: 1px solid rgba(255,255,255,0.1);
+  padding: 8px 12px; display: none; backdrop-filter: blur(8px);
+}
+#gallery-strip {
+  display: flex; gap: 8px; overflow-x: auto; align-items: center;
+  scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.2) transparent;
+}
+#gallery-strip img {
+  height: 80px; border-radius: 4px; cursor: pointer; opacity: 0.8;
+  transition: opacity 0.2s, transform 0.2s; flex-shrink: 0;
+  background: #111; object-fit: contain;
+}
+#gallery-strip img:hover { opacity: 1; transform: scale(1.05); }
+#gallery-strip .gallery-label {
+  color: #888; font-size: 12px; white-space: nowrap; margin-right: 8px; flex-shrink: 0;
+}
+
 .help-link { color: #4a9eff; font-size: 12px; cursor: pointer; margin-top: 6px; }
 .help-link:hover { text-decoration: underline; }
 
@@ -164,6 +183,10 @@ body { background: #0a0a0f; color: #e0e0e0; font-family: -apple-system, BlinkMac
     <div class="artist" id="tip-artist"></div>
     <div class="extra" id="tip-extra"></div>
   </div>
+</div>
+
+<div id="gallery">
+  <div id="gallery-strip"></div>
 </div>
 
 <div id="detail">
@@ -562,8 +585,14 @@ function draw() {
     const isPinned = i === pinnedIdx;
     const isSearched = searchHighlight.has(i);
     const dimmed = searchHighlight.size > 0 && !isSearched;
-    const alpha = isHovered || isPinned ? 1.0 : dimmed ? 0.05 : isSearched ? 1.0 : Math.min(0.85, 0.25 + zoom / 50);
-    const size = isHovered || isPinned ? pointSize * 2.5 : isSearched ? pointSize * 2 : pointSize;
+    if (dimmed) {
+      // Gray, very faint — just enough to see the map shape
+      ctx.fillStyle = "rgba(60,60,70,0.08)";
+      ctx.fillRect(sx - pointSize/2, sy - pointSize/2, pointSize, pointSize);
+      continue;
+    }
+    const alpha = isHovered || isPinned ? 1.0 : isSearched ? 0.95 : Math.min(0.85, 0.25 + zoom / 50);
+    const size = isHovered || isPinned ? pointSize * 2.5 : isSearched ? pointSize * 3 : pointSize;
 
     if (isHovered || isPinned) {
       ctx.fillStyle = `rgba(255,255,255,0.9)`;
@@ -754,7 +783,10 @@ canvas.addEventListener("touchend", (e) => {
 
 // Keyboard
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") closeDetail();
+  if (e.key === "Escape") {
+    closeDetail();
+    clearSearch();
+  }
 });
 
 // Search
@@ -785,11 +817,8 @@ searchInput.addEventListener("input", () => {
 
 searchInput.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
-    searchInput.value = "";
-    searchResults.innerHTML = "";
-    searchHighlight.clear();
+    clearSearch();
     searchInput.blur();
-    draw();
   }
   if (e.key === "Enter") {
     const first = searchResults.querySelector(".result");
@@ -802,7 +831,6 @@ searchInput.addEventListener("mousedown", (e) => e.stopPropagation());
 
 function flyToArtist(indices) {
   if (!indices.length) return;
-  // Find center of matching points
   let sumX = 0, sumY = 0;
   for (const i of indices) {
     sumX += coords[i * 2];
@@ -811,7 +839,6 @@ function flyToArtist(indices) {
   cx = sumX / indices.length;
   cy = sumY / indices.length;
 
-  // Zoom to fit the points
   let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
   for (const i of indices) {
     const x = coords[i*2], y = coords[i*2+1];
@@ -821,9 +848,49 @@ function flyToArtist(indices) {
   const span = Math.max(maxX - minX, maxY - minY, 0.1);
   zoom = Math.min(W, H) / span * 0.5;
 
-  // Highlight matching points
   searchHighlight = new Set(indices);
   searchResults.innerHTML = "";
+  draw();
+
+  // Show gallery strip with artist's works
+  const gallery = document.getElementById("gallery");
+  const strip = document.getElementById("gallery-strip");
+  strip.innerHTML = "";
+
+  // Add label
+  const label = document.createElement("span");
+  label.className = "gallery-label";
+  label.textContent = meta[indices[0]]?.a + " (" + indices.length + ")";
+  strip.appendChild(label);
+
+  // Show up to 20 works with images
+  let shown = 0;
+  for (const i of indices) {
+    if (shown >= 20) break;
+    const m = meta[i];
+    if (!m?.ik || !m.ik.startsWith("http")) continue;
+    const img = document.createElement("img");
+    img.src = m.ik.replace(/!\d+,\d+/, "!128,128");
+    img.title = m.t || "Untitled";
+    img.onclick = () => {
+      // Fly to this specific work
+      cx = coords[i*2];
+      cy = coords[i*2+1];
+      zoom = Math.min(W, H) / 2;
+      showDetail(i);
+      draw();
+    };
+    strip.appendChild(img);
+    shown++;
+  }
+  gallery.style.display = shown > 0 ? "block" : "none";
+}
+
+function clearSearch() {
+  searchInput.value = "";
+  searchResults.innerHTML = "";
+  searchHighlight.clear();
+  document.getElementById("gallery").style.display = "none";
   draw();
 }
 
