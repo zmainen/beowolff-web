@@ -512,8 +512,10 @@ function draw() {
   const pointSize = Math.max(0.8, Math.min(5, 2 * Math.sqrt(zoom / 10)));
 
   const metaLoaded = meta.length >= N;
-  for (let i = 0; i < N; i++) {
-    const m = meta[i];
+  // Before metadata loads, draw every 4th point to stay responsive
+  const step = metaLoaded ? 1 : 4;
+  for (let i = 0; i < N; i += step) {
+    const m = metaLoaded ? meta[i] : null;
     if (metaLoaded) {
       const tp = m?.tp || m?.c;
       const corpus = m?.c;
