@@ -754,14 +754,15 @@ function draw() {
   const pointSize = Math.max(0.8, Math.min(5, 2 * Math.sqrt(zoom / 10)));
 
   const metaLoaded = meta.length >= N;
-  // Before metadata loads, draw every 4th point to stay responsive
-  const step = metaLoaded ? 1 : 4;
-  for (let i = 0; i < N; i += step) {
-    const m = metaLoaded ? meta[i] : null;
-    if (metaLoaded) {
-      const tp = m?.tp || m?.c;
-      const corpus = m?.c;
+  for (let i = 0; i < N; i++) {
+    const m = metaLoaded ? meta[i] : (i < meta.length ? meta[i] : null);
+    if (m) {
+      const tp = m.tp || m.c;
+      const corpus = m.c;
       if (!activeTypes.has(tp) || !activeCorpora.has(corpus)) continue;
+    } else {
+      // No metadata yet for this point — skip it (will appear once loaded)
+      continue;
     }
 
     const x = coords[i * 2];
@@ -801,12 +802,14 @@ function draw() {
     }
 
     ctx.fillStyle = `rgba(${col[0]},${col[1]},${col[2]},${alpha})`;
-    if (isHovered || isPinned || isSearched) {
+    if (size > 3 || isHovered || isPinned || isSearched) {
       ctx.beginPath();
       ctx.arc(sx, sy, size / 2, 0, Math.PI * 2);
       ctx.fill();
     } else {
-      ctx.fillRect(sx - size/2, sy - size/2, size, size);
+      // Tiny points: use fillRect for performance, but round size
+      const s = Math.max(1, Math.round(size));
+      ctx.fillRect(sx, sy, s, s);
     }
   }
 
