@@ -249,6 +249,7 @@ const CORPUS_DOT_CSS = {
 };
 
 let colorMode = "type"; // "type" or "corpus"
+let darkMode = true;
 
 // Spatial index — grid of cells in data space for fast hover lookup
 let grid = null;
@@ -425,8 +426,64 @@ function setupColorMode() {
   btnCorpus.innerHTML = '<span class="toggle"></span>Color by collection';
   btnCorpus.onclick = () => { colorMode = "corpus"; btnCorpus.classList.add("active"); btnType.classList.remove("active"); updateDotVisibility(); draw(); };
 
+  const btnTheme = document.createElement("div");
+  btnTheme.className = "ctrl-btn";
+  btnTheme.id = "btn-theme";
+  btnTheme.innerHTML = '<span class="toggle"></span>Light background';
+  btnTheme.onclick = () => { darkMode = !darkMode; btnTheme.classList.toggle("active"); applyTheme(); draw(); };
+
   container.appendChild(btnType);
   container.appendChild(btnCorpus);
+  container.appendChild(btnTheme);
+}
+
+// Darker versions of colors for light background
+const TYPE_COLORS_LIGHT = {
+  paintings: [180, 40, 40],
+  painting: [180, 40, 40],
+  prints: [40, 100, 200],
+  photographs: [20, 150, 80],
+  drawings: [180, 140, 0],
+  sculpture: [160, 40, 130],
+  miniatures: [200, 90, 20],
+  pastels: [110, 60, 200],
+};
+const CORPUS_COLORS_LIGHT = {
+  rijksmuseum: [40, 100, 200],
+  wikiart: [200, 90, 20],
+  met: [20, 150, 80],
+  nga: [160, 40, 130],
+};
+
+function applyTheme() {
+  const bg = darkMode ? "#0a0a0f" : "#f0f0f0";
+  const text = darkMode ? "#e0e0e0" : "#222";
+  const panelBg = darkMode ? "rgba(12,16,26,0.85)" : "rgba(255,255,255,0.9)";
+  const panelBorder = darkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)";
+
+  document.body.style.background = bg;
+  document.body.style.color = text;
+
+  for (const el of document.querySelectorAll("#info, #controls, #tooltip, #detail, #gallery")) {
+    el.style.background = panelBg;
+    el.style.borderColor = panelBorder;
+    el.style.color = text;
+  }
+  // Landmark labels
+  for (const el of document.querySelectorAll(".landmark")) {
+    el.style.color = darkMode ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.5)";
+    el.style.textShadow = darkMode ? "0 1px 6px rgba(0,0,0,0.9)" : "0 1px 4px rgba(255,255,255,0.9)";
+  }
+}
+
+function getTypeColor(tp) {
+  const map = darkMode ? TYPE_COLORS : TYPE_COLORS_LIGHT;
+  return map[tp] || [128, 128, 128];
+}
+
+function getCorpusColor(c) {
+  const map = darkMode ? CORPUS_COLORS : CORPUS_COLORS_LIGHT;
+  return map[c] || [128, 128, 128];
 }
 
 function updateDotVisibility() {
@@ -594,7 +651,8 @@ function findNearestBrute(mx, my, threshold) {
 
 // Rendering
 function draw() {
-  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = darkMode ? "#0a0a0f" : "#f0f0f0";
+  ctx.fillRect(0, 0, W, H);
   if (!coords) return;
 
   const pointSize = Math.max(0.8, Math.min(5, 2 * Math.sqrt(zoom / 10)));
@@ -618,15 +676,14 @@ function draw() {
     if (sx < -10 || sx > W + 10 || sy < -10 || sy > H + 10) continue;
 
     const col = metaLoaded
-      ? (colorMode === "corpus" ? (CORPUS_COLORS[m?.c] || [128,128,128]) : (TYPE_COLORS[m?.tp] || [128,128,128]))
-      : [77, 153, 255];
+      ? (colorMode === "corpus" ? getCorpusColor(m?.c) : getTypeColor(m?.tp))
+      : (darkMode ? [77, 153, 255] : [40, 100, 200]);
     const isHovered = i === hoveredIdx;
     const isPinned = i === pinnedIdx;
     const isSearched = searchHighlight.has(i);
     const dimmed = searchHighlight.size > 0 && !isSearched;
     if (dimmed) {
-      // Gray, very faint — just enough to see the map shape
-      ctx.fillStyle = "rgba(60,60,70,0.08)";
+      ctx.fillStyle = darkMode ? "rgba(60,60,70,0.08)" : "rgba(180,180,190,0.15)";
       ctx.fillRect(sx - pointSize/2, sy - pointSize/2, pointSize, pointSize);
       continue;
     }
