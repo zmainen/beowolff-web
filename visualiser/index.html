@@ -782,12 +782,41 @@ canvas.addEventListener("touchend", (e) => {
 });
 
 // Keyboard
+let searchIndices = []; // ordered list of current search results
+let searchCursor = -1;  // current position in search results
+
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
     closeDetail();
     clearSearch();
+    return;
+  }
+  if (searchIndices.length === 0) return;
+  if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+    e.preventDefault();
+    searchCursor = (searchCursor + 1) % searchIndices.length;
+    navigateToWork(searchIndices[searchCursor]);
+  } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+    e.preventDefault();
+    searchCursor = (searchCursor - 1 + searchIndices.length) % searchIndices.length;
+    navigateToWork(searchIndices[searchCursor]);
   }
 });
+
+function navigateToWork(i) {
+  cx = coords[i * 2];
+  cy = coords[i * 2 + 1];
+  zoom = Math.max(zoom, Math.min(W, H) / 3);
+  showDetail(i);
+  draw();
+  // Scroll gallery strip to show current work
+  const strip = document.getElementById("gallery-strip");
+  const imgs = strip.querySelectorAll("img");
+  imgs.forEach((img, idx) => {
+    img.style.outline = idx === searchCursor ? "2px solid #4a9eff" : "none";
+  });
+  if (imgs[searchCursor]) imgs[searchCursor].scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+}
 
 // Search
 const searchInput = document.getElementById("search");
@@ -849,6 +878,13 @@ function flyToArtist(indices) {
   zoom = Math.min(W, H) / span * 0.5;
 
   searchHighlight = new Set(indices);
+  // Store ordered indices for arrow-key navigation (prefer ones with images first)
+  searchIndices = indices.slice().sort((a, b) => {
+    const aHas = meta[a]?.ik?.startsWith("http") ? 0 : 1;
+    const bHas = meta[b]?.ik?.startsWith("http") ? 0 : 1;
+    return aHas - bHas;
+  });
+  searchCursor = -1;
   searchResults.innerHTML = "";
   draw();
 
@@ -890,6 +926,8 @@ function clearSearch() {
   searchInput.value = "";
   searchResults.innerHTML = "";
   searchHighlight.clear();
+  searchIndices = [];
+  searchCursor = -1;
   document.getElementById("gallery").style.display = "none";
   draw();
 }
