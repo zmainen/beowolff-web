@@ -343,6 +343,9 @@ async function load() {
   document.getElementById("count").textContent = `${N.toLocaleString()} works`;
   document.getElementById("loading").style.display = "none";
 
+  // Check for pin parameter
+  checkPin();
+
   // First draw — show dots immediately
   draw();
 
@@ -612,6 +615,7 @@ function draw() {
     }
   }
 
+  drawPin();
   updateLandmarks();
 }
 
@@ -931,6 +935,58 @@ function clearSearch() {
   searchCursor = -1;
   document.getElementById("gallery").style.display = "none";
   draw();
+}
+
+// "You are here" pin
+let pinX = null, pinY = null;
+
+function checkPin() {
+  const params = new URLSearchParams(window.location.search);
+  const pin = params.get("pin");
+  if (pin) {
+    const parts = pin.split(",");
+    if (parts.length === 2) {
+      pinX = parseFloat(parts[0]);
+      pinY = parseFloat(parts[1]);
+      // Center on the pin and zoom in
+      cx = pinX;
+      cy = pinY;
+      zoom = Math.min(W, H) / 5;
+    }
+  }
+}
+
+function drawPin() {
+  if (pinX === null || pinY === null) return;
+  const sx = (pinX - cx) * zoom + W / 2;
+  const sy = (pinY - cy) * -zoom + H / 2;
+
+  // Outer glow
+  const gradient = ctx.createRadialGradient(sx, sy, 0, sx, sy, 20);
+  gradient.addColorStop(0, "rgba(255, 100, 50, 0.6)");
+  gradient.addColorStop(1, "rgba(255, 100, 50, 0)");
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.arc(sx, sy, 20, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Inner dot
+  ctx.fillStyle = "#ff6432";
+  ctx.beginPath();
+  ctx.arc(sx, sy, 6, 0, Math.PI * 2);
+  ctx.fill();
+
+  // White ring
+  ctx.strokeStyle = "#fff";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(sx, sy, 8, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Label
+  ctx.fillStyle = "#fff";
+  ctx.font = "12px -apple-system, sans-serif";
+  ctx.fillText("Your painting", sx + 14, sy + 4);
 }
 
 function toggleHelp() {
