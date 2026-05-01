@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beowolff — Art Explorer</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0a0a0f; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; overflow: hidden; }
+canvas { width: 100vw; height: 100vh; display: block; cursor: grab; }
+canvas:active { cursor: grabbing; }
+
+#info {
+  position: fixed; top: 16px; left: 16px; z-index: 10;
+  background: rgba(12,16,26,0.85); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; padding: 12px 16px; max-width: 280px;
+  backdrop-filter: blur(8px); font-size: 13px; line-height: 1.5;
+}
+#info h1 { font-size: 16px; font-weight: 600; margin-bottom: 4px; color: #fff; }
+#info .count { color: #888; font-size: 12px; }
+
+#tooltip {
+  position: fixed; z-index: 20; pointer-events: none; display: none;
+  background: rgba(12,16,26,0.95); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px; overflow: hidden; max-width: 260px;
+  backdrop-filter: blur(12px); box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+#tooltip img { width: 100%; max-height: 120px; object-fit: contain; background: #111; display: block; }
+#tooltip .meta { padding: 8px 12px; }
+#tooltip .title { font-size: 13px; font-weight: 600; color: #fff; }
+#tooltip .artist { font-size: 12px; color: #aaa; margin-top: 2px; }
+#tooltip .extra { font-size: 11px; color: #666; margin-top: 2px; }
+
+#detail {
+  position: fixed; bottom: 20px; right: 20px; z-index: 15;
+  background: rgba(12,16,26,0.95); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px; padding: 0; max-width: 320px; display: none;
+  backdrop-filter: blur(12px); overflow: hidden;
+}
+#detail img { width: 100%; max-height: 280px; object-fit: contain; background: #111; }
+#detail .meta { padding: 12px 16px; }
+#detail .title { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+#detail .artist { font-size: 13px; color: #aaa; }
+#detail .extra { font-size: 12px; color: #666; margin-top: 4px; }
+#detail .close { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); border: none; color: #fff; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 14px; line-height: 24px; text-align: center; }
+
+#controls {
+  position: fixed; top: 16px; right: 16px; z-index: 10;
+  background: rgba(12,16,26,0.85); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; padding: 10px 12px;
+  backdrop-filter: blur(8px);
+}
+#filters { display: flex; flex-direction: column; gap: 3px; }
+#projection-toggle { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
+
+.ctrl-btn {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  color: #666; border-radius: 6px; padding: 5px 12px; font-size: 12px;
+  cursor: pointer; transition: all 0.2s; user-select: none;
+  display: flex; align-items: center; gap: 6px; min-width: 160px;
+}
+.ctrl-btn.active { background: rgba(255,255,255,0.12); color: #fff; border-color: rgba(255,255,255,0.25); }
+.ctrl-btn .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; opacity: 0.3; transition: opacity 0.2s; }
+.ctrl-btn.active .dot { opacity: 1.0; }
+.ctrl-btn .toggle { width: 28px; height: 14px; border-radius: 7px; background: rgba(255,255,255,0.15); position: relative; flex-shrink: 0; transition: background 0.2s; }
+.ctrl-btn .toggle::after { content: ""; position: absolute; width: 10px; height: 10px; border-radius: 50%; background: #666; top: 2px; left: 2px; transition: all 0.2s; }
+.ctrl-btn.active .toggle { background: rgba(74,158,255,0.5); }
+.ctrl-btn.active .toggle::after { background: #4a9eff; left: 16px; }
+
+#search {
+  width: 100%; margin-top: 8px; padding: 6px 10px; font-size: 13px;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px; color: #fff; outline: none;
+}
+#search:focus { border-color: #4a9eff; }
+#search::placeholder { color: #666; }
+#search-results { max-height: 200px; overflow-y: auto; font-size: 12px; }
+#search-results .result { padding: 4px 0; cursor: pointer; color: #aaa; border-bottom: 1px solid rgba(255,255,255,0.05); }
+#search-results .result:hover { color: #fff; }
+#search-results .result .count { color: #666; font-size: 11px; }
+
+#zoom-controls {
+  position: fixed; top: 50%; left: 16px; z-index: 10;
+  transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: 2px;
+}
+#zoom-controls button {
+  width: 36px; height: 36px; border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(12,16,26,0.85); color: #ccc; font-size: 18px;
+  cursor: pointer; backdrop-filter: blur(8px); transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+#zoom-controls button:first-child { border-radius: 6px 6px 0 0; }
+#zoom-controls button:last-child { border-radius: 0 0 6px 6px; }
+#zoom-controls button:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+#gallery {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 12;
+  background: rgba(12,16,26,0.9); border-top: 1px solid rgba(255,255,255,0.1);
+  padding: 8px 12px; display: none; backdrop-filter: blur(8px);
+}
+#gallery-strip {
+  display: flex; gap: 8px; overflow-x: auto; align-items: center;
+  scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.2) transparent;
+}
+#gallery-strip img {
+  height: 80px; border-radius: 4px; cursor: pointer; opacity: 0.8;
+  transition: opacity 0.2s, transform 0.2s; flex-shrink: 0;
+  background: #111; object-fit: contain;
+}
+#gallery-strip img:hover { opacity: 1; transform: scale(1.05); }
+#gallery-strip .gallery-label { color: #888; font-size: 12px; white-space: nowrap; margin-right: 8px; flex-shrink: 0; }
+
+.help-link { color: #4a9eff; font-size: 12px; cursor: pointer; margin-top: 6px; }
+.help-link:hover { text-decoration: underline; }
+
+#help-panel {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 25;
+  background: rgba(12,16,26,0.97); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 12px; padding: 28px 32px; max-width: 520px; width: 90vw;
+  backdrop-filter: blur(16px); display: none; max-height: 80vh; overflow-y: auto;
+  line-height: 1.65; font-size: 14px;
+}
+#help-panel h2 { font-size: 18px; color: #fff; margin-bottom: 12px; }
+#help-panel h3 { font-size: 14px; color: #4a9eff; margin-top: 16px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+#help-panel p { color: #bbb; margin-bottom: 10px; }
+#help-panel strong { color: #fff; }
+#help-panel a { color: #4a9eff; text-decoration: none; }
+#help-panel a:hover { text-decoration: underline; }
+#help-panel .footer { font-size: 12px; color: #666; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; }
+#help-panel .close { position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.1); border: none; color: #aaa; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-size: 16px; line-height: 28px; text-align: center; }
+#help-panel .close:hover { background: rgba(255,255,255,0.2); color: #fff; }
+
+#loading {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20;
+  text-align: center; font-size: 14px; color: #888;
+}
+#loading .bar { width: 200px; height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 12px; }
+#loading .fill { height: 100%; background: #4a9eff; border-radius: 2px; transition: width 0.3s; width: 0%; }
+
+#date-legend {
+  display: none; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 8px; flex-direction: column; gap: 4px; font-size: 11px; color: #888;
+}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div>Loading art collection…</div>
+  <div class="bar"><div class="fill" id="load-fill"></div></div>
+</div>
+
+<div id="info">
+  <h1>Beowolff Art Explorer</h1>
+  <div class="count" id="count"></div>
+  <input type="text" id="search" placeholder="Search artist…" autocomplete="off">
+  <div id="search-results"></div>
+  <div style="display:flex; gap:12px; margin-top:8px;">
+    <div class="help-link" onclick="toggleHelp()">About</div>
+    <div class="help-link"><a href="/visualiser/how-it-sees.html" style="color:#4a9eff; text-decoration:none;">How it works</a></div>
+  </div>
+</div>
+
+<div id="help-panel">
+  <button class="close" onclick="toggleHelp()">&times;</button>
+  <h2>What is this?</h2>
+  <p>Every dot is an artwork — nearly 690,000 works from the Rijksmuseum, WikiArt, the Metropolitan Museum of Art, and the National Gallery of Art. Works that are similar land near each other. The map is computed by projecting high-dimensional representations of each work into two dimensions using UMAP.</p>
+  <h3>Two ways of seeing</h3>
+  <p><strong>Semantic (SigLIP)</strong> organizes by what works depict and what tradition they belong to. SigLIP is a vision-language model (Google, 2023) trained on billions of image-text pairs. It learned to encode both what things look like and what they mean — a Vermeer interior and a Hopper interior share a direction (dimly lit room, solitary figure) while differing along others (17th-century Dutch vs. 20th-century American). This is why prints, photographs, paintings, and drawings form distinct continents.</p>
+  <p><strong>Aesthetic (Iigaya)</strong> organizes by how works feel. Thirteen perceptual dimensions — brightness, hue contrast, sharpness, color temperature, compositional balance, visual dynamics — derived from a computational model of aesthetic preference (Iigaya et al., Nature Human Behaviour 2021). A dark moody photograph and a dark moody painting land near each other regardless of medium, because they share the same aesthetic character.</p>
+  <h3>Navigation</h3>
+  <p>Pan by dragging. Zoom with scroll wheel (zooms toward your cursor). Hover over a dot to see the artwork. Click to pin the detail panel. Toggle collections on and off to isolate what you want to explore.</p>
+  <p class="footer">Built by <a href="https://t.me/BeowolffArtBot">Beowolff</a> · Zachary Mainen · Champalimaud Research</p>
+</div>
+
+<div id="controls">
+  <div id="projection-toggle"></div>
+  <div id="color-mode" style="margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;"></div>
+  <div id="corpus-toggle" style="margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;"></div>
+  <div id="filters"></div>
+  <div id="date-legend">
+    <div style="display:flex; justify-content:space-between;"><span>1400</span><span>1600</span><span>1800</span><span>2000</span></div>
+    <div style="height:8px; border-radius:4px; background:linear-gradient(to right, #440154, #3b528b, #21918c, #5ec962, #fde725);"></div>
+  </div>
+</div>
+
+<div id="zoom-controls">
+  <button onclick="zoomIn()" title="Zoom in">+</button>
+  <button onclick="zoomOut()" title="Zoom out">−</button>
+  <button onclick="resetView()" title="Reset view (R)" style="font-size:11px;">⌂</button>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<div id="tooltip">
+  <img id="tip-img" src="">
+  <div class="meta">
+    <div class="title" id="tip-title"></div>
+    <div class="artist" id="tip-artist"></div>
+    <div class="extra" id="tip-extra"></div>
+  </div>
+</div>
+
+<div id="gallery">
+  <div id="gallery-strip"></div>
+</div>
+
+<div id="detail">
+  <button class="close" onclick="closeDetail()">&times;</button>
+  <img id="detail-img" src="">
+  <div class="meta">
+    <div class="title" id="detail-title"></div>
+    <div class="artist" id="detail-artist"></div>
+    <div class="extra" id="detail-extra"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/regl@2.1.0/dist/regl.min.js"></script>
+<script>
+const SOS = "https://sos-de-muc-1.exo.io/beowolff-corpora";
+const BASE = `${SOS}/visualiser/v1`;
+const SPRITE_BASE = `${SOS}/visualiser/v2`;
+const SHEET_SIZE = 4096;
+const THUMB_PX = 8;
+const NUM_SHEETS = 3;
+
+// --- Color maps ---
+const TYPE_COLORS = {
+  paintings: [230,77,77], painting: [230,77,77], prints: [77,153,255],
+  photographs: [51,230,128], drawings: [255,204,51], sculpture: [230,77,179],
+  miniatures: [255,128,51], pastels: [153,102,255],
+};
+const TYPE_CSS = {
+  paintings: "#e64d4d", painting: "#e64d4d", prints: "#4d99ff", photographs: "#33e680",
+  drawings: "#ffcc33", sculpture: "#e64dB3", miniatures: "#ff8033", pastels: "#9966ff",
+};
+const CORPUS_COLORS = {
+  rijksmuseum: [77,153,255], wikiart: [255,128,51], met: [51,230,128], nga: [230,77,179],
+};
+const CORPUS_DOT_CSS = {
+  rijksmuseum: "#4d99ff", wikiart: "#ff8033", met: "#33e680", nga: "#e64dB3",
+};
+const TYPE_COLORS_LIGHT = {
+  paintings: [180,40,40], painting: [180,40,40], prints: [40,100,200],
+  photographs: [20,150,80], drawings: [180,140,0], sculpture: [160,40,130],
+  miniatures: [200,90,20], pastels: [110,60,200],
+};
+const CORPUS_COLORS_LIGHT = {
+  rijksmuseum: [40,100,200], wikiart: [200,90,20], met: [20,150,80], nga: [160,40,130],
+};
+
+// --- State ---
+let coordsSigLIP = null, coordsIigaya = null, coords = null;
+let meta = [], landmarks = [], manifest = null, N = 0;
+let activeProjection = "siglip";
+let cx = 0, cy = 0, zoom = 1;
+let dragging = false, dragX = 0, dragY = 0, dragMoved = false;
+let activeTypes = new Set(), activeCorpora = new Set();
+let hoveredIdx = -1, pinnedIdx = -1;
+let searchHighlight = new Set();
+let colorMode = "type", darkMode = true;
+let artistIndex = {};
+let searchIndices = [], searchCursor = -1;
+
+// Sprite data
+let spriteMap = null;   // Uint8Array, N*5
+let spriteTextures = [null, null, null]; // regl textures
+let spritesReady = false;
+
+// Spatial grid
+let grid = null, gridCellSize = 0, gridOffsetX = 0, gridOffsetY = 0, gridCols = 0, gridRows = 0;
+
+// GPU buffers — rebuilt when data or visibility changes
+let visibleCount = 0;
+let indexMap = null;        // Int32Array N — maps draw-order index to data index
+let needsBufferRebuild = true;
+
+// WebGL
+const canvas = document.getElementById("canvas");
+let W, H, dpr;
+
+function resize() {
+  dpr = window.devicePixelRatio || 1;
+  W = window.innerWidth; H = window.innerHeight;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.width = W + "px"; canvas.style.height = H + "px";
+}
+window.addEventListener("resize", () => { resize(); scheduleFrame(); });
+resize();
+
+const regl = createREGL({ canvas, attributes: { antialias: true, alpha: false }, pixelRatio: dpr });
+
+// Persistent GPU buffers — allocated once at max capacity, updated via subdata
+const gpuBufs = {
+  position: regl.buffer({ usage: "dynamic", type: "float", length: 4 }),
+  color: regl.buffer({ usage: "dynamic", type: "float", length: 4 }),
+  alpha: regl.buffer({ usage: "dynamic", type: "float", length: 4 }),
+  spriteUV: regl.buffer({ usage: "dynamic", type: "float", length: 4 }),
+};
+const dummyTex = regl.texture({ width: 1, height: 1, data: [0, 0, 0, 255] });
+
+// --- Shaders ---
+
+const drawDots = regl({
+  vert: `
+    precision highp float;
+    attribute vec2 position;
+    attribute vec3 color;
+    attribute float alpha;
+    uniform vec2 center;
+    uniform float scale;
+    uniform vec2 resolution;
+    uniform float pointSize;
+    varying vec3 vColor;
+    varying float vAlpha;
+    void main() {
+      vec2 screen = (position - center) * scale;
+      screen.y = -screen.y;
+      gl_Position = vec4(screen / (resolution * 0.5), 0, 1);
+      gl_PointSize = pointSize;
+      vColor = color;
+      vAlpha = alpha;
+    }
+  `,
+  frag: `
+    precision highp float;
+    varying vec3 vColor;
+    varying float vAlpha;
+    uniform float pointSize;
+    void main() {
+      if (pointSize > 3.0) {
+        float d = length(gl_PointCoord - 0.5);
+        if (d > 0.5) discard;
+      }
+      gl_FragColor = vec4(vColor, vAlpha);
+    }
+  `,
+  attributes: {
+    position: { buffer: gpuBufs.position, size: 2 },
+    color: { buffer: gpuBufs.color, size: 3 },
+    alpha: { buffer: gpuBufs.alpha, size: 1 },
+  },
+  uniforms: {
+    center: () => [cx, cy],
+    scale: () => zoom,
+    resolution: () => [W, H],
+    pointSize: () => Math.max(1.5, Math.min(6, 2.5 * Math.sqrt(zoom / 10))),
+  },
+  count: () => visibleCount,
+  primitive: "points",
+  blend: {
+    enable: true,
+    func: { srcRGB: "src alpha", srcAlpha: "one", dstRGB: "one minus src alpha", dstAlpha: "one minus src alpha" },
+  },
+  depth: { enable: false },
+});
+
+const drawSprites = regl({
+  vert: `
+    precision highp float;
+    attribute vec2 position;
+    attribute vec4 spriteUV;
+    attribute vec3 color;
+    attribute float alpha;
+    uniform vec2 center;
+    uniform float scale;
+    uniform vec2 resolution;
+    uniform float pointSize;
+    varying vec2 vUV;
+    varying float vSheet;
+    varying vec3 vColor;
+    varying float vAlpha;
+    void main() {
+      vec2 screen = (position - center) * scale;
+      screen.y = -screen.y;
+      gl_Position = vec4(screen / (resolution * 0.5), 0, 1);
+      gl_PointSize = pointSize;
+      vUV = spriteUV.xy;
+      vSheet = spriteUV.z;
+      vColor = color;
+      vAlpha = alpha;
+    }
+  `,
+  frag: `
+    precision highp float;
+    varying vec2 vUV;
+    varying float vSheet;
+    varying vec3 vColor;
+    varying float vAlpha;
+    uniform sampler2D sheet0;
+    uniform sampler2D sheet1;
+    uniform sampler2D sheet2;
+    uniform float thumbFrac;
+    void main() {
+      vec2 uv = vUV + gl_PointCoord * thumbFrac;
+      vec4 tex;
+      int s = int(vSheet + 0.5);
+      if (s == 0) tex = texture2D(sheet0, uv);
+      else if (s == 1) tex = texture2D(sheet1, uv);
+      else tex = texture2D(sheet2, uv);
+      gl_FragColor = vec4(tex.rgb, vAlpha);
+    }
+  `,
+  attributes: {
+    position: { buffer: gpuBufs.position, size: 2 },
+    spriteUV: { buffer: gpuBufs.spriteUV, size: 4 },
+    color: { buffer: gpuBufs.color, size: 3 },
+    alpha: { buffer: gpuBufs.alpha, size: 1 },
+  },
+  uniforms: {
+    center: () => [cx, cy],
+    scale: () => zoom,
+    resolution: () => [W, H],
+    pointSize: () => Math.max(1.5, Math.min(12, 2.5 * Math.sqrt(zoom / 10))),
+    sheet0: () => spriteTextures[0] || dummyTex,
+    sheet1: () => spriteTextures[1] || dummyTex,
+    sheet2: () => spriteTextures[2] || dummyTex,
+    thumbFrac: THUMB_PX / SHEET_SIZE,
+  },
+  count: () => visibleCount,
+  primitive: "points",
+  blend: {
+    enable: true,
+    func: { srcRGB: "src alpha", srcAlpha: "one", dstRGB: "one minus src alpha", dstAlpha: "one minus src alpha" },
+  },
+  depth: { enable: false },
+});
+
+// --- Buffer building ---
+
+function getTypeColor(tp) {
+  const map = darkMode ? TYPE_COLORS : TYPE_COLORS_LIGHT;
+  return map[tp] || [128, 128, 128];
+}
+function getCorpusColor(c) {
+  const map = darkMode ? CORPUS_COLORS : CORPUS_COLORS_LIGHT;
+  return map[c] || [128, 128, 128];
+}
+function parseYear(dateStr) {
+  if (!dateStr) return null;
+  const m = dateStr.match(/\b(\d{4})\b/);
+  if (m) { const y = parseInt(m[1]); if (y >= 1000 && y <= 2030) return y; }
+  return null;
+}
+function dateColor(year) {
+  if (year === null) return [80, 80, 80];
+  let t = Math.max(0, Math.min(1, (year - 1400) / 600));
+  if (t < 0.25) { const s = t / 0.25; return [68 + s * (-10)|0, 1 + s * 85|0, 84 + s * 80|0]; }
+  if (t < 0.5) { const s = (t - 0.25) / 0.25; return [58 - s * 25|0, 86 + s * 80|0, 164 - s * 20|0]; }
+  if (t < 0.75) { const s = (t - 0.5) / 0.25; return [33 + s * 100|0, 166 + s * 30|0, 144 - s * 80|0]; }
+  const s = (t - 0.75) / 0.25; return [133 + s * 120|0, 196 + s * 50|0, 64 - s * 40|0];
+}
+
+function rebuildBuffers() {
+  if (!coords || N === 0) return;
+  const metaLoaded = meta.length >= N;
+  const hasSpriteMap = spriteMap !== null;
+
+  const pos = new Float32Array(N * 2);
+  const suv = new Float32Array(N * 4);
+  const col = new Float32Array(N * 3);
+  const alp = new Float32Array(N);
+  const imap = new Int32Array(N);
+  let count = 0;
+
+  const dimmed = searchHighlight.size > 0;
+
+  for (let i = 0; i < N; i++) {
+    const m = i < meta.length ? meta[i] : null;
+    if (m) {
+      const tp = m.tp || m.c;
+      if (!activeTypes.has(tp) || !activeCorpora.has(m.c)) continue;
+    } else if (metaLoaded) {
+      continue;
+    } else {
+      continue; // skip until metadata loaded
+    }
+
+    const off = count * 2;
+    pos[off] = coords[i * 2];
+    pos[off + 1] = coords[i * 2 + 1];
+
+    // Sprite UV
+    if (hasSpriteMap) {
+      const so = i * 5;
+      const sheet = spriteMap[so];
+      const px = spriteMap[so + 1] | (spriteMap[so + 2] << 8);
+      const py = spriteMap[so + 3] | (spriteMap[so + 4] << 8);
+      const si = count * 4;
+      suv[si] = px / SHEET_SIZE;
+      suv[si + 1] = py / SHEET_SIZE;
+      suv[si + 2] = sheet;
+      suv[si + 3] = 0;
+    }
+
+    // Color
+    let c;
+    const isSearched = dimmed && searchHighlight.has(i);
+
+    if (dimmed && !isSearched) {
+      c = darkMode ? [60, 60, 70] : [180, 180, 190];
+      alp[count] = darkMode ? 0.08 : 0.15;
+    } else {
+      if (colorMode === "corpus") c = getCorpusColor(m?.c);
+      else if (colorMode === "date") c = dateColor(parseYear(m?.d));
+      else c = getTypeColor(m?.tp);
+      alp[count] = isSearched ? 0.95 : Math.min(0.85, 0.25 + zoom / 50);
+    }
+    col[count * 3] = c[0] / 255;
+    col[count * 3 + 1] = c[1] / 255;
+    col[count * 3 + 2] = c[2] / 255;
+
+    imap[count] = i;
+    count++;
+  }
+
+  visibleCount = count;
+  indexMap = imap.subarray(0, count);
+  // Upload to persistent GPU buffers
+  gpuBufs.position(pos.subarray(0, count * 2));
+  gpuBufs.color(col.subarray(0, count * 3));
+  gpuBufs.alpha(alp.subarray(0, count));
+  gpuBufs.spriteUV(suv.subarray(0, count * 4));
+  needsBufferRebuild = false;
+}
+
+// --- Pin overlay (drawn on a 2D overlay canvas) ---
+let overlayCanvas, overlayCtx;
+function ensureOverlay() {
+  if (overlayCanvas) return;
+  overlayCanvas = document.createElement("canvas");
+  overlayCanvas.style.cssText = "position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:4;";
+  document.body.appendChild(overlayCanvas);
+}
+
+function drawOverlay() {
+  ensureOverlay();
+  overlayCanvas.width = W * dpr; overlayCanvas.height = H * dpr;
+  overlayCanvas.style.width = W + "px"; overlayCanvas.style.height = H + "px";
+  overlayCtx = overlayCanvas.getContext("2d");
+  overlayCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  overlayCtx.clearRect(0, 0, W, H);
+  drawPin(overlayCtx);
+  drawHoverRing(overlayCtx);
+}
+
+function drawHoverRing(ctx) {
+  const idx = hoveredIdx >= 0 ? hoveredIdx : pinnedIdx;
+  if (idx < 0 || !coords) return;
+  const sx = (coords[idx * 2] - cx) * zoom + W / 2;
+  const sy = (coords[idx * 2 + 1] - cy) * -zoom + H / 2;
+  const ps = Math.max(1.5, Math.min(12, 2.5 * Math.sqrt(zoom / 10)));
+  ctx.strokeStyle = "rgba(255,255,255,0.9)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(sx, sy, ps + 3, 0, Math.PI * 2);
+  ctx.stroke();
+}
+
+let pinX = null, pinY = null;
+function checkPin() {
+  const params = new URLSearchParams(window.location.search);
+  const pin = params.get("pin");
+  if (pin) {
+    const parts = pin.split(",");
+    if (parts.length === 2) {
+      pinX = parseFloat(parts[0]);
+      pinY = parseFloat(parts[1]);
+      cx = pinX; cy = pinY;
+      zoom = Math.min(W, H) / 5;
+    }
+  }
+}
+
+function drawPin(ctx) {
+  if (pinX === null) return;
+  const sx = (pinX - cx) * zoom + W / 2;
+  const sy = (pinY - cy) * -zoom + H / 2;
+  const gradient = ctx.createRadialGradient(sx, sy, 0, sx, sy, 20);
+  gradient.addColorStop(0, "rgba(255, 100, 50, 0.6)");
+  gradient.addColorStop(1, "rgba(255, 100, 50, 0)");
+  ctx.fillStyle = gradient;
+  ctx.beginPath(); ctx.arc(sx, sy, 20, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#ff6432";
+  ctx.beginPath(); ctx.arc(sx, sy, 6, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = "#fff"; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(sx, sy, 8, 0, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = "#fff"; ctx.font = "12px -apple-system, sans-serif";
+  ctx.fillText("Your painting", sx + 14, sy + 4);
+}
+
+// --- Render loop ---
+let frameRequested = false;
+function scheduleFrame() {
+  if (frameRequested) return;
+  frameRequested = true;
+  requestAnimationFrame(draw);
+}
+
+function draw() {
+  frameRequested = false;
+  if (!coords) return;
+  if (needsBufferRebuild) rebuildBuffers();
+  if (visibleCount === 0) return;
+
+  const bg = darkMode ? [10/255, 10/255, 15/255, 1] : [240/255, 240/255, 240/255, 1];
+  regl.clear({ color: bg });
+
+  if (spritesReady && spriteMap) {
+    drawSprites();
+  } else {
+    drawDots();
+  }
+
+  drawOverlay();
+}
+
+// --- Spatial grid ---
+function buildGrid() {
+  if (!coords || N === 0) return;
+  const b = manifest.bounds;
+  const span = Math.max(b.xmax - b.xmin, b.ymax - b.ymin);
+  gridCellSize = span / 200;
+  gridOffsetX = b.xmin; gridOffsetY = b.ymin;
+  gridCols = Math.ceil((b.xmax - b.xmin) / gridCellSize) + 1;
+  gridRows = Math.ceil((b.ymax - b.ymin) / gridCellSize) + 1;
+  grid = new Array(gridCols * gridRows);
+  for (let i = 0; i < grid.length; i++) grid[i] = [];
+  for (let i = 0; i < N; i++) {
+    const gx = Math.floor((coords[i * 2] - gridOffsetX) / gridCellSize);
+    const gy = Math.floor((coords[i * 2 + 1] - gridOffsetY) / gridCellSize);
+    const cell = gy * gridCols + gx;
+    if (cell >= 0 && cell < grid.length) grid[cell].push(i);
+  }
+}
+
+function findNearest(mx, my, threshold) {
+  if (!grid) return -1;
+  const wx = (mx - W / 2) / zoom + cx;
+  const wy = -((my - H / 2) / zoom) + cy;
+  const radius = threshold / zoom;
+  const gxMin = Math.max(0, Math.floor((wx - radius - gridOffsetX) / gridCellSize));
+  const gxMax = Math.min(gridCols - 1, Math.floor((wx + radius - gridOffsetX) / gridCellSize));
+  const gyMin = Math.max(0, Math.floor((wy - radius - gridOffsetY) / gridCellSize));
+  const gyMax = Math.min(gridRows - 1, Math.floor((wy + radius - gridOffsetY) / gridCellSize));
+  let closest = -1, closestDist = threshold * threshold;
+  for (let gy = gyMin; gy <= gyMax; gy++) {
+    for (let gx = gxMin; gx <= gxMax; gx++) {
+      const cell = grid[gy * gridCols + gx];
+      if (!cell) continue;
+      for (const i of cell) {
+        const m = meta[i];
+        if (!m) continue;
+        const tp = m.tp || m.c;
+        if (!activeTypes.has(tp) || !activeCorpora.has(m.c)) continue;
+        const sx = (coords[i * 2] - cx) * zoom + W / 2;
+        const sy = (coords[i * 2 + 1] - cy) * -zoom + H / 2;
+        const dx = sx - mx, dy = sy - my;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < closestDist) { closest = i; closestDist = d2; }
+      }
+    }
+  }
+  return closest;
+}
+
+// --- Artist index ---
+function buildArtistIndex() {
+  artistIndex = {};
+  for (let i = 0; i < N; i++) {
+    const a = meta[i]?.a;
+    if (a && a.length > 1) {
+      const key = a.toLowerCase();
+      if (!artistIndex[key]) artistIndex[key] = [];
+      artistIndex[key].push(i);
+    }
+  }
+}
+
+// --- Data loading ---
+async function load() {
+  const fill = document.getElementById("load-fill");
+  fill.style.width = "10%";
+
+  const mResp = await fetch(`${BASE}/manifest.json`);
+  manifest = await mResp.json();
+  N = manifest.total;
+  landmarks = manifest.landmarks || [];
+  fill.style.width = "20%";
+
+  const cResp = await fetch(`${BASE}/coords.bin`);
+  coordsSigLIP = new Float32Array(await cResp.arrayBuffer());
+  coords = coordsSigLIP;
+  fill.style.width = "40%";
+
+  centerView();
+
+  // Merge painting/paintings
+  const types = manifest.types || {};
+  if (types["painting"] && types["paintings"]) { types["paintings"] += types["painting"]; delete types["painting"]; }
+  else if (types["painting"]) { types["paintings"] = types["painting"]; delete types["painting"]; }
+  const allTypes = Object.keys(types);
+  const defaultOff = new Set(manifest.default_off || []);
+  activeTypes = new Set(allTypes.filter(t => !defaultOff.has(t)));
+  if (activeTypes.has("paintings")) activeTypes.add("painting");
+  activeCorpora = new Set(Object.keys(manifest.corpora || {}));
+
+  setupColorMode();
+  setupCorpusToggle();
+  setupFilters();
+  setupProjectionToggle();
+  checkPin();
+
+  document.getElementById("count").textContent = `${N.toLocaleString()} works`;
+  document.getElementById("loading").style.display = "none";
+
+  needsBufferRebuild = true;
+  scheduleFrame();
+
+  requestAnimationFrame(() => {
+    buildGrid();
+    loadMetadata();
+    loadSpriteData();
+  });
+}
+
+async function loadMetadata() {
+  const chunks = manifest.chunks || [];
+  for (let i = 0; i < chunks.length; i++) {
+    const resp = await fetch(`${BASE}/${chunks[i]}`);
+    const text = await resp.text();
+    await new Promise(resolve => {
+      setTimeout(() => { const chunk = JSON.parse(text); meta.push(...chunk); resolve(); }, 0);
+    });
+    if (i % 3 === 2) { needsBufferRebuild = true; scheduleFrame(); }
+  }
+  buildArtistIndex();
+  needsBufferRebuild = true;
+  scheduleFrame();
+  loadIigayaCoords();
+}
+
+async function loadIigayaCoords() {
+  try {
+    const resp = await fetch(`${BASE}/coords_iigaya.bin`);
+    if (resp.ok) {
+      coordsIigaya = new Float32Array(await resp.arrayBuffer());
+      const btn = document.getElementById("btn-iigaya");
+      if (btn) btn.style.opacity = "1";
+    }
+  } catch(e) {}
+}
+
+async function loadSpriteData() {
+  // Load sprite map
+  try {
+    const resp = await fetch(`${SPRITE_BASE}/sprite_map.bin`);
+    if (!resp.ok) return;
+    spriteMap = new Uint8Array(await resp.arrayBuffer());
+  } catch(e) { return; }
+
+  // Load sprite sheet textures
+  let loaded = 0;
+  const promises = [];
+  for (let i = 0; i < NUM_SHEETS; i++) {
+    const p = new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        spriteTextures[i] = regl.texture({
+          data: img, mag: "nearest", min: "nearest",
+          wrapS: "clamp", wrapT: "clamp", flipY: false,
+        });
+        loaded++;
+        if (loaded === NUM_SHEETS) {
+          spritesReady = true;
+          needsBufferRebuild = true;
+          scheduleFrame();
+        }
+        resolve();
+      };
+      img.onerror = () => resolve();
+      img.src = `${SPRITE_BASE}/sprite_${String(i).padStart(3, "0")}.jpg`;
+    });
+    promises.push(p);
+  }
+  await Promise.all(promises);
+}
+
+function centerView() {
+  const b = manifest.bounds;
+  cx = (b.xmin + b.xmax) / 2;
+  cy = (b.ymin + b.ymax) / 2;
+  const span = Math.max(b.xmax - b.xmin, b.ymax - b.ymin);
+  zoom = Math.min(W, H) / span * 0.85;
+}
+
+// --- Controls ---
+function setupColorMode() {
+  const container = document.getElementById("color-mode");
+  const allBtns = [];
+  const make = (id, label, mode) => {
+    const btn = document.createElement("div");
+    btn.className = mode === colorMode ? "ctrl-btn active" : "ctrl-btn";
+    btn.id = id;
+    btn.innerHTML = `<span class="toggle"></span>${label}`;
+    btn.onclick = () => { colorMode = mode; allBtns.forEach(b => b.classList.remove("active")); btn.classList.add("active"); document.getElementById("date-legend").style.display = mode === "date" ? "flex" : "none"; needsBufferRebuild = true; scheduleFrame(); };
+    allBtns.push(btn);
+    container.appendChild(btn);
+    return btn;
+  };
+  make("btn-color-type", "Color by medium", "type");
+  make("btn-color-corpus", "Color by collection", "corpus");
+  make("btn-color-date", "Color by date", "date");
+
+  const btnTheme = document.createElement("div");
+  btnTheme.className = "ctrl-btn";
+  btnTheme.innerHTML = '<span class="toggle"></span>Light background';
+  btnTheme.onclick = () => { darkMode = !darkMode; btnTheme.classList.toggle("active"); needsBufferRebuild = true; scheduleFrame(); };
+  container.appendChild(btnTheme);
+}
+
+function setupCorpusToggle() {
+  const container = document.getElementById("corpus-toggle");
+  const sorted = Object.entries(manifest.corpora || {}).sort((a, b) => b[1] - a[1]);
+  for (const [corpus, count] of sorted) {
+    const btn = document.createElement("div");
+    btn.className = "ctrl-btn active";
+    const k = count >= 1000 ? `${(count / 1000).toFixed(0)}k` : count;
+    btn.innerHTML = `<span class="toggle"></span><span class="dot" style="background:${CORPUS_DOT_CSS[corpus] || '#888'}"></span>${corpus} (${k})`;
+    btn.onclick = () => {
+      if (activeCorpora.has(corpus)) { activeCorpora.delete(corpus); btn.classList.remove("active"); }
+      else { activeCorpora.add(corpus); btn.classList.add("active"); }
+      needsBufferRebuild = true; scheduleFrame();
+    };
+    container.appendChild(btn);
+  }
+}
+
+function setupFilters() {
+  const container = document.getElementById("filters");
+  const types = manifest.types || manifest.corpora;
+  const sorted = Object.entries(types).sort((a, b) => b[1] - a[1]);
+  for (const [tp, count] of sorted) {
+    const btn = document.createElement("div");
+    btn.className = activeTypes.has(tp) ? "ctrl-btn active" : "ctrl-btn";
+    btn.dataset.type = tp;
+    const k = count >= 1000 ? `${(count / 1000).toFixed(0)}k` : count;
+    btn.innerHTML = `<span class="toggle"></span><span class="dot" style="background:${TYPE_CSS[tp] || '#888'}"></span>${tp} (${k})`;
+    btn.onclick = () => {
+      if (activeTypes.has(tp)) {
+        activeTypes.delete(tp);
+        if (tp === "paintings") activeTypes.delete("painting");
+        btn.classList.remove("active");
+      } else {
+        activeTypes.add(tp);
+        if (tp === "paintings") activeTypes.add("painting");
+        btn.classList.add("active");
+      }
+      needsBufferRebuild = true; scheduleFrame();
+    };
+    container.appendChild(btn);
+  }
+}
+
+function setupProjectionToggle() {
+  const container = document.getElementById("projection-toggle");
+  const btnS = document.createElement("div");
+  btnS.className = "ctrl-btn active"; btnS.id = "btn-siglip";
+  btnS.innerHTML = '<span class="toggle"></span>Semantic (SigLIP)';
+  btnS.onclick = () => switchProjection("siglip");
+
+  const btnI = document.createElement("div");
+  btnI.className = "ctrl-btn"; btnI.id = "btn-iigaya";
+  btnI.innerHTML = '<span class="toggle"></span>Aesthetic (Iigaya)';
+  btnI.style.opacity = coordsIigaya ? "1" : "0.4";
+  btnI.onclick = () => switchProjection("iigaya");
+
+  container.appendChild(btnS); container.appendChild(btnI);
+}
+
+function switchProjection(proj) {
+  if (proj === "iigaya" && !coordsIigaya) return;
+  activeProjection = proj;
+  coords = proj === "siglip" ? coordsSigLIP : coordsIigaya;
+  document.getElementById("btn-siglip").classList.toggle("active", proj === "siglip");
+  document.getElementById("btn-iigaya").classList.toggle("active", proj === "iigaya");
+  let xmin = Infinity, xmax = -Infinity, ymin = Infinity, ymax = -Infinity;
+  for (let i = 0; i < N; i++) {
+    const x = coords[i * 2], y = coords[i * 2 + 1];
+    if (x < xmin) xmin = x; if (x > xmax) xmax = x;
+    if (y < ymin) ymin = y; if (y > ymax) ymax = y;
+  }
+  manifest.bounds = { xmin, xmax, ymin, ymax };
+  buildGrid(); centerView();
+  needsBufferRebuild = true; scheduleFrame();
+}
+
+// --- Tooltip ---
+const tooltip = document.getElementById("tooltip");
+const tipImg = document.getElementById("tip-img");
+const tipTitle = document.getElementById("tip-title");
+const tipArtist = document.getElementById("tip-artist");
+const tipExtra = document.getElementById("tip-extra");
+
+function showTooltip(i, mx, my) {
+  const m = meta[i];
+  tipTitle.textContent = m.t || "";
+  tipArtist.textContent = m.a || "";
+  tipExtra.textContent = [m.d, m.m, m.c].filter(Boolean).join(" · ");
+  if (m.ik && m.ik.startsWith("http")) {
+    const smallUrl = m.ik.replace(/!\d+,\d+/, "!48,48");
+    tipImg.style.opacity = "0.3";
+    tipImg.src = smallUrl;
+    tipImg.style.display = "block";
+    tipImg.onload = () => { tipImg.style.opacity = "1"; };
+  } else {
+    tipImg.style.display = "none";
+  }
+  let tx = mx + 16, ty = my + 16;
+  if (tx + 260 > W) tx = mx - 276;
+  if (ty + 250 > H) ty = my - 260;
+  tooltip.style.left = tx + "px"; tooltip.style.top = ty + "px";
+  tooltip.style.display = "block";
+}
+
+function hideTooltip() { tooltip.style.display = "none"; }
+
+// --- Detail panel ---
+function showDetail(i) {
+  const m = meta[i];
+  const img = document.getElementById("detail-img");
+  if (m.ik && m.ik.startsWith("http")) {
+    img.src = m.ik.replace("!256,256", "!512,512");
+    img.style.display = "block";
+  } else { img.style.display = "none"; }
+  document.getElementById("detail-title").textContent = m.t || "";
+  document.getElementById("detail-artist").textContent = m.a || "";
+  document.getElementById("detail-extra").textContent = [m.d, m.m, m.c].filter(Boolean).join(" · ");
+  document.getElementById("detail").style.display = "block";
+  pinnedIdx = i;
+  scheduleFrame();
+}
+
+function closeDetail() {
+  document.getElementById("detail").style.display = "none";
+  pinnedIdx = -1;
+  scheduleFrame();
+}
+
+// --- Mouse interaction ---
+canvas.addEventListener("mousedown", (e) => { dragging = true; dragMoved = false; dragX = e.clientX; dragY = e.clientY; });
+
+window.addEventListener("mousemove", (e) => {
+  if (dragging) {
+    const dx = e.clientX - dragX, dy = e.clientY - dragY;
+    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) dragMoved = true;
+    cx -= dx / zoom; cy += dy / zoom;
+    dragX = e.clientX; dragY = e.clientY;
+    hideTooltip();
+    scheduleFrame();
+    return;
+  }
+  if (!coords || !meta.length) return;
+  const idx = findNearest(e.clientX, e.clientY, 12);
+  if (idx !== hoveredIdx) {
+    hoveredIdx = idx;
+    if (idx >= 0) showTooltip(idx, e.clientX, e.clientY);
+    else hideTooltip();
+    scheduleFrame(); // overlay only — no buffer rebuild
+  } else if (idx >= 0) {
+    let tx = e.clientX + 16, ty = e.clientY + 16;
+    if (tx + 260 > W) tx = e.clientX - 276;
+    if (ty + 250 > H) ty = e.clientY - 260;
+    tooltip.style.left = tx + "px"; tooltip.style.top = ty + "px";
+  }
+});
+
+window.addEventListener("mouseup", (e) => {
+  if (!dragMoved && hoveredIdx >= 0) showDetail(hoveredIdx);
+  else if (!dragMoved) closeDetail();
+  dragging = false; dragMoved = false;
+});
+
+canvas.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  const factor = e.deltaY > 0 ? 0.85 : 1.18;
+  const mx = e.clientX, my = e.clientY;
+  const wx = (mx - W / 2) / zoom + cx;
+  const wy = -(my - H / 2) / zoom + cy;
+  zoom *= factor;
+  cx = wx - (mx - W / 2) / zoom;
+  cy = wy + (my - H / 2) / zoom;
+  scheduleFrame();
+}, { passive: false });
+
+// Touch
+let lastTouchDist = 0;
+canvas.addEventListener("touchstart", (e) => {
+  e.preventDefault();
+  if (e.touches.length === 1) { dragging = true; dragMoved = false; dragX = e.touches[0].clientX; dragY = e.touches[0].clientY; }
+  else if (e.touches.length === 2) { lastTouchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); }
+}, { passive: false });
+
+canvas.addEventListener("touchmove", (e) => {
+  e.preventDefault();
+  if (e.touches.length === 1 && dragging) {
+    const dx = e.touches[0].clientX - dragX, dy = e.touches[0].clientY - dragY;
+    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) dragMoved = true;
+    cx -= dx / zoom; cy += dy / zoom;
+    dragX = e.touches[0].clientX; dragY = e.touches[0].clientY;
+    scheduleFrame();
+  } else if (e.touches.length === 2) {
+    const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+    if (lastTouchDist > 0) { zoom *= dist / lastTouchDist; scheduleFrame(); }
+    lastTouchDist = dist;
+  }
+}, { passive: false });
+
+canvas.addEventListener("touchend", (e) => {
+  if (!dragMoved && e.changedTouches.length === 1) {
+    const t = e.changedTouches[0];
+    const idx = findNearest(t.clientX, t.clientY, 20);
+    if (idx >= 0) showDetail(idx); else closeDetail();
+  }
+  dragging = false; dragMoved = false; lastTouchDist = 0;
+});
+
+// Keyboard
+const searchInput = document.getElementById("search");
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") { closeDetail(); clearSearch(); return; }
+  if ((e.key === "r" || e.key === "R") && document.activeElement !== searchInput) { resetView(); return; }
+  if (searchIndices.length === 0) return;
+  if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+    e.preventDefault();
+    searchCursor = (searchCursor + 1) % searchIndices.length;
+    navigateToWork(searchIndices[searchCursor]);
+  } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+    e.preventDefault();
+    searchCursor = (searchCursor - 1 + searchIndices.length) % searchIndices.length;
+    navigateToWork(searchIndices[searchCursor]);
+  }
+});
+
+function navigateToWork(i) {
+  cx = coords[i * 2]; cy = coords[i * 2 + 1];
+  zoom = Math.min(Math.max(zoom, Math.min(W, H) / 5), Math.min(W, H) / 2);
+  showDetail(i);
+  const strip = document.getElementById("gallery-strip");
+  const imgs = strip.querySelectorAll("img");
+  imgs.forEach((img, idx) => { img.style.outline = idx === searchCursor ? "2px solid #4a9eff" : "none"; });
+  if (imgs[searchCursor]) imgs[searchCursor].scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+}
+
+// Search
+const searchResults = document.getElementById("search-results");
+searchInput.addEventListener("input", () => {
+  const q = searchInput.value.toLowerCase().trim();
+  searchResults.innerHTML = "";
+  searchHighlight.clear();
+  if (q.length < 2) { needsBufferRebuild = true; scheduleFrame(); return; }
+  const matches = [];
+  for (const [name, indices] of Object.entries(artistIndex)) {
+    if (name.includes(q)) matches.push({ name, indices, count: indices.length });
+  }
+  matches.sort((a, b) => b.count - a.count);
+  for (const m of matches.slice(0, 10)) {
+    const div = document.createElement("div");
+    div.className = "result";
+    div.innerHTML = `${m.name} <span class="count">(${m.count})</span>`;
+    div.onclick = () => flyToArtist(m.indices);
+    searchResults.appendChild(div);
+  }
+});
+searchInput.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") { clearSearch(); searchInput.blur(); }
+  if (e.key === "Enter") { const first = searchResults.querySelector(".result"); if (first) first.click(); }
+});
+searchInput.addEventListener("mousedown", (e) => e.stopPropagation());
+
+function flyToArtist(indices) {
+  if (!indices.length) return;
+  let sumX = 0, sumY = 0;
+  for (const i of indices) { sumX += coords[i * 2]; sumY += coords[i * 2 + 1]; }
+  cx = sumX / indices.length; cy = sumY / indices.length;
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (const i of indices) {
+    const x = coords[i * 2], y = coords[i * 2 + 1];
+    if (x < minX) minX = x; if (x > maxX) maxX = x;
+    if (y < minY) minY = y; if (y > maxY) maxY = y;
+  }
+  const span = Math.max(maxX - minX, maxY - minY, 0.5);
+  zoom = Math.min(Math.min(W, H) / span * 0.4, Math.min(W, H) / 3);
+  searchHighlight = new Set(indices);
+  searchIndices = indices.slice().sort((a, b) => {
+    const aHas = meta[a]?.ik?.startsWith("http") ? 0 : 1;
+    const bHas = meta[b]?.ik?.startsWith("http") ? 0 : 1;
+    return aHas - bHas;
+  });
+  searchCursor = -1;
+  searchResults.innerHTML = "";
+  needsBufferRebuild = true; scheduleFrame();
+
+  const gallery = document.getElementById("gallery");
+  const strip = document.getElementById("gallery-strip");
+  strip.innerHTML = "";
+  const label = document.createElement("span");
+  label.className = "gallery-label";
+  label.textContent = meta[indices[0]]?.a + " (" + indices.length + ")";
+  strip.appendChild(label);
+  let shown = 0;
+  for (const i of indices) {
+    if (shown >= 20) break;
+    const m = meta[i];
+    if (!m?.ik || !m.ik.startsWith("http")) continue;
+    const img = document.createElement("img");
+    img.src = m.ik.replace(/!\d+,\d+/, "!128,128");
+    img.title = m.t || "";
+    img.onclick = () => { searchCursor = searchIndices.indexOf(i); navigateToWork(i); };
+    strip.appendChild(img);
+    shown++;
+  }
+  gallery.style.display = shown > 0 ? "block" : "none";
+}
+
+function clearSearch() {
+  searchInput.value = ""; searchResults.innerHTML = "";
+  searchHighlight.clear(); searchIndices = []; searchCursor = -1;
+  document.getElementById("gallery").style.display = "none";
+  needsBufferRebuild = true; scheduleFrame();
+}
+
+function zoomIn() { zoom *= 1.5; scheduleFrame(); }
+function zoomOut() { zoom /= 1.5; scheduleFrame(); }
+function resetView() { centerView(); clearSearch(); closeDetail(); scheduleFrame(); }
+function toggleHelp() {
+  const panel = document.getElementById("help-panel");
+  panel.style.display = panel.style.display === "block" ? "none" : "block";
+}
+
+load();
+</script>
+</body>
+</html>
