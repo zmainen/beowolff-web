@@ -73,6 +73,22 @@ body { background: #0a0a0f; color: #e0e0e0; font-family: -apple-system, BlinkMac
 .ctrl-btn.active .toggle { background: rgba(74,158,255,0.5); }
 .ctrl-btn.active .toggle::after { background: #4a9eff; left: 16px; }
 
+#search {
+  width: 100%; margin-top: 8px; padding: 6px 10px; font-size: 13px;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px; color: #fff; outline: none;
+}
+#search:focus { border-color: #4a9eff; }
+#search::placeholder { color: #666; }
+#search-results {
+  max-height: 200px; overflow-y: auto; font-size: 12px;
+}
+#search-results .result {
+  padding: 4px 0; cursor: pointer; color: #aaa; border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+#search-results .result:hover { color: #fff; }
+#search-results .result .count { color: #666; font-size: 11px; }
+
 .help-link { color: #4a9eff; font-size: 12px; cursor: pointer; margin-top: 6px; }
 .help-link:hover { text-decoration: underline; }
 
@@ -111,6 +127,8 @@ body { background: #0a0a0f; color: #e0e0e0; font-family: -apple-system, BlinkMac
 <div id="info">
   <h1>Beowolff Art Explorer</h1>
   <div class="count" id="count"></div>
+  <input type="text" id="search" placeholder="Search artist…" autocomplete="off">
+  <div id="search-results"></div>
   <div class="help-link" onclick="toggleHelp()">What am I looking at?</div>
 </div>
 
@@ -198,6 +216,46 @@ const CORPUS_DOT_CSS = {
   rijksmuseum: "#4d99ff", wikiart: "#ff8033", met: "#33e680", nga: "#e64dB3",
 };
 
+// Spatial index — grid of cells in data space for fast hover lookup
+let grid = null;
+let gridCellSize = 0;
+let gridOffsetX = 0, gridOffsetY = 0;
+let gridCols = 0, gridRows = 0;
+
+function buildGrid() {
+  if (!coords || N === 0) return;
+  const b = manifest.bounds;
+  const span = Math.max(b.xmax - b.xmin, b.ymax - b.ymin);
+  gridCellSize = span / 200; // 200x200 grid
+  gridOffsetX = b.xmin;
+  gridOffsetY = b.ymin;
+  gridCols = Math.ceil((b.xmax - b.xmin) / gridCellSize) + 1;
+  gridRows = Math.ceil((b.ymax - b.ymin) / gridCellSize) + 1;
+  grid = new Array(gridCols * gridRows);
+  for (let i = 0; i < grid.length; i++) grid[i] = [];
+  for (let i = 0; i < N; i++) {
+    const gx = Math.floor((coords[i*2] - gridOffsetX) / gridCellSize);
+    const gy = Math.floor((coords[i*2+1] - gridOffsetY) / gridCellSize);
+    const cell = gy * gridCols + gx;
+    if (cell >= 0 && cell < grid.length) grid[cell].push(i);
+  }
+}
+
+// Artist index for search
+let artistIndex = {}; // lowercase name -> [indices]
+
+function buildArtistIndex() {
+  artistIndex = {};
+  for (let i = 0; i < N; i++) {
+    const a = meta[i]?.a;
+    if (a && a.length > 1) {
+      const key = a.toLowerCase();
+      if (!artistIndex[key]) artistIndex[key] = [];
+      artistIndex[key].push(i);
+    }
+  }
+}
+
 // Spatial index for hover
 let gridCells = {};
 const GRID_SIZE = 50; // pixels
@@ -259,6 +317,8 @@ async function load() {
   document.getElementById("count").textContent = `${N.toLocaleString()} works`;
   document.getElementById("loading").style.display = "none";
 
+  buildGrid();
+  buildArtistIndex();
   draw();
 
   // Load Iigaya coords in background
@@ -356,6 +416,7 @@ function switchProjection(proj) {
     if (y < ymin) ymin = y; if (y > ymax) ymax = y;
   }
   manifest.bounds = {xmin, xmax, ymin, ymax};
+  buildGrid();
   centerView();
   draw();
 }
@@ -388,8 +449,39 @@ function updateLandmarks() {
   }
 }
 
-// Find nearest point to screen position
+// Find nearest point to screen position using spatial grid
 function findNearest(mx, my, threshold) {
+  if (!grid) return findNearestBrute(mx, my, threshold);
+  // Convert screen to data coords
+  const wx = (mx - W/2) / zoom + cx;
+  const wy = -((my - H/2) / zoom) + cy;
+  // Search radius in data space
+  const radius = threshold / zoom;
+  const gxMin = Math.max(0, Math.floor((wx - radius - gridOffsetX) / gridCellSize));
+  const gxMax = Math.min(gridCols - 1, Math.floor((wx + radius - gridOffsetX) / gridCellSize));
+  const gyMin = Math.max(0, Math.floor((wy - radius - gridOffsetY) / gridCellSize));
+  const gyMax = Math.min(gridRows - 1, Math.floor((wy + radius - gridOffsetY) / gridCellSize));
+
+  let closest = -1, closestDist = threshold * threshold;
+  for (let gy = gyMin; gy <= gyMax; gy++) {
+    for (let gx = gxMin; gx <= gxMax; gx++) {
+      const cell = grid[gy * gridCols + gx];
+      if (!cell) continue;
+      for (const i of cell) {
+        const tp = meta[i]?.tp || meta[i]?.c;
+        if (!activeTypes.has(tp) || !activeCorpora.has(meta[i]?.c)) continue;
+        const sx = (coords[i*2] - cx) * zoom + W/2;
+        const sy = (coords[i*2+1] - cy) * -zoom + H/2;
+        const dx = sx - mx, dy = sy - my;
+        const d2 = dx*dx + dy*dy;
+        if (d2 < closestDist) { closest = i; closestDist = d2; }
+      }
+    }
+  }
+  return closest;
+}
+
+function findNearestBrute(mx, my, threshold) {
   let closest = -1, closestDist = threshold * threshold;
   for (let i = 0; i < N; i++) {
     const tp = meta[i]?.tp || meta[i]?.c;
@@ -426,8 +518,10 @@ function draw() {
     const col = TYPE_COLORS[tp] || [128, 128, 128];
     const isHovered = i === hoveredIdx;
     const isPinned = i === pinnedIdx;
-    const alpha = isHovered || isPinned ? 1.0 : Math.min(0.85, 0.25 + zoom / 50);
-    const size = isHovered || isPinned ? pointSize * 2.5 : pointSize;
+    const isSearched = searchHighlight.has(i);
+    const dimmed = searchHighlight.size > 0 && !isSearched;
+    const alpha = isHovered || isPinned ? 1.0 : dimmed ? 0.05 : isSearched ? 1.0 : Math.min(0.85, 0.25 + zoom / 50);
+    const size = isHovered || isPinned ? pointSize * 2.5 : isSearched ? pointSize * 2 : pointSize;
 
     if (isHovered || isPinned) {
       ctx.fillStyle = `rgba(255,255,255,0.9)`;
@@ -611,6 +705,78 @@ canvas.addEventListener("touchend", (e) => {
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeDetail();
 });
+
+// Search
+const searchInput = document.getElementById("search");
+const searchResults = document.getElementById("search-results");
+let searchHighlight = new Set();
+
+searchInput.addEventListener("input", () => {
+  const q = searchInput.value.toLowerCase().trim();
+  searchResults.innerHTML = "";
+  searchHighlight.clear();
+  if (q.length < 2) { draw(); return; }
+
+  const matches = [];
+  for (const [name, indices] of Object.entries(artistIndex)) {
+    if (name.includes(q)) {
+      matches.push({name, indices, count: indices.length});
+    }
+  }
+  matches.sort((a, b) => b.count - a.count);
+
+  for (const m of matches.slice(0, 10)) {
+    const div = document.createElement("div");
+    div.className = "result";
+    div.innerHTML = `${m.name} <span class="count">(${m.count})</span>`;
+    div.onclick = () => flyToArtist(m.indices);
+    searchResults.appendChild(div);
+  }
+});
+
+searchInput.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    searchInput.value = "";
+    searchResults.innerHTML = "";
+    searchHighlight.clear();
+    searchInput.blur();
+    draw();
+  }
+  if (e.key === "Enter") {
+    const first = searchResults.querySelector(".result");
+    if (first) first.click();
+  }
+});
+
+// Prevent pan when typing
+searchInput.addEventListener("mousedown", (e) => e.stopPropagation());
+
+function flyToArtist(indices) {
+  if (!indices.length) return;
+  // Find center of matching points
+  let sumX = 0, sumY = 0;
+  for (const i of indices) {
+    sumX += coords[i * 2];
+    sumY += coords[i * 2 + 1];
+  }
+  cx = sumX / indices.length;
+  cy = sumY / indices.length;
+
+  // Zoom to fit the points
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (const i of indices) {
+    const x = coords[i*2], y = coords[i*2+1];
+    if (x < minX) minX = x; if (x > maxX) maxX = x;
+    if (y < minY) minY = y; if (y > maxY) maxY = y;
+  }
+  const span = Math.max(maxX - minX, maxY - minY, 0.1);
+  zoom = Math.min(W, H) / span * 0.5;
+
+  // Highlight matching points
+  searchHighlight = new Set(indices);
+  searchResults.innerHTML = "";
+  draw();
+}
 
 function toggleHelp() {
   const panel = document.getElementById("help-panel");
