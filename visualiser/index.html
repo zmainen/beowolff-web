@@ -148,8 +148,10 @@ body { background: #0a0a0f; color: #e0e0e0; font-family: -apple-system, BlinkMac
   <div class="count" id="count"></div>
   <input type="text" id="search" placeholder="Search artist…" autocomplete="off">
   <div id="search-results"></div>
-  <div style="display:flex; gap:12px; margin-top:8px;">
-    <div class="help-link" onclick="resetView()">Reset view</div>
+  <div style="display:flex; gap:8px; margin-top:8px; align-items:center;">
+    <div class="help-link" onclick="resetView()">Reset</div>
+    <div class="help-link" onclick="zoomIn()">+</div>
+    <div class="help-link" onclick="zoomOut()">−</div>
     <div class="help-link" onclick="toggleHelp()">About</div>
     <div class="help-link"><a href="/visualiser/how-it-sees.html" style="color:#4a9eff; text-decoration:none;">How it works</a></div>
   </div>
@@ -176,6 +178,10 @@ body { background: #0a0a0f; color: #e0e0e0; font-family: -apple-system, BlinkMac
   <div id="color-mode" style="margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;"></div>
   <div id="corpus-toggle" style="margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;"></div>
   <div id="filters"></div>
+  <div id="date-legend" style="display:none; margin-top:8px; border-top:1px solid rgba(255,255,255,0.1); padding-top:8px; flex-direction:column; gap:4px; font-size:11px; color:#888;">
+    <div style="display:flex; justify-content:space-between;"><span>1400</span><span>1600</span><span>1800</span><span>2000</span></div>
+    <div style="height:8px; border-radius:4px; background:linear-gradient(to right, #440154, #3b528b, #21918c, #5ec962, #fde725);"></div>
+  </div>
 </div>
 
 <div id="landmarks"></div>
@@ -251,7 +257,7 @@ const CORPUS_DOT_CSS = {
   rijksmuseum: "#4d99ff", wikiart: "#ff8033", met: "#33e680", nga: "#e64dB3",
 };
 
-let colorMode = "type"; // "type" or "corpus"
+let colorMode = "type"; // "type" or "corpus" or "date"
 let darkMode = true;
 
 // Spatial index — grid of cells in data space for fast hover lookup
@@ -421,13 +427,22 @@ function setupColorMode() {
   btnType.className = "ctrl-btn active";
   btnType.id = "btn-color-type";
   btnType.innerHTML = '<span class="toggle"></span>Color by medium';
-  btnType.onclick = () => { colorMode = "type"; btnType.classList.add("active"); btnCorpus.classList.remove("active"); updateDotVisibility(); draw(); };
+  const allColorBtns = [];
+  btnType.onclick = () => { colorMode = "type"; allColorBtns.forEach(b => b.classList.remove("active")); btnType.classList.add("active"); updateDotVisibility(); draw(); };
 
   const btnCorpus = document.createElement("div");
   btnCorpus.className = "ctrl-btn";
   btnCorpus.id = "btn-color-corpus";
   btnCorpus.innerHTML = '<span class="toggle"></span>Color by collection';
-  btnCorpus.onclick = () => { colorMode = "corpus"; btnCorpus.classList.add("active"); btnType.classList.remove("active"); updateDotVisibility(); draw(); };
+  btnCorpus.onclick = () => { colorMode = "corpus"; allColorBtns.forEach(b => b.classList.remove("active")); btnCorpus.classList.add("active"); updateDotVisibility(); draw(); };
+
+  const btnDate = document.createElement("div");
+  btnDate.className = "ctrl-btn";
+  btnDate.id = "btn-color-date";
+  btnDate.innerHTML = '<span class="toggle"></span>Color by date';
+  btnDate.onclick = () => { colorMode = "date"; allColorBtns.forEach(b => b.classList.remove("active")); btnDate.classList.add("active"); updateDotVisibility(); draw(); };
+
+  allColorBtns.push(btnType, btnCorpus, btnDate);
 
   const btnTheme = document.createElement("div");
   btnTheme.className = "ctrl-btn";
@@ -437,6 +452,7 @@ function setupColorMode() {
 
   container.appendChild(btnType);
   container.appendChild(btnCorpus);
+  container.appendChild(btnDate);
   container.appendChild(btnTheme);
 }
 
@@ -489,9 +505,46 @@ function getCorpusColor(c) {
   return map[c] || [128, 128, 128];
 }
 
+// Date color — extract year from date string, map to gradient
+function parseYear(dateStr) {
+  if (!dateStr) return null;
+  // Match first 4-digit number that looks like a year
+  const m = dateStr.match(/\b(\d{4})\b/);
+  if (m) {
+    const y = parseInt(m[1]);
+    if (y >= 1000 && y <= 2030) return y;
+  }
+  return null;
+}
+
+// Viridis-inspired gradient: purple (old) → teal → yellow (new)
+function dateColor(year) {
+  if (year === null) return [80, 80, 80];
+  const minY = 1400, maxY = 2000;
+  let t = (year - minY) / (maxY - minY);
+  t = Math.max(0, Math.min(1, t));
+  // Purple → Blue → Teal → Green → Yellow
+  if (t < 0.25) {
+    const s = t / 0.25;
+    return [Math.round(68 + s * (-10)), Math.round(1 + s * 85), Math.round(84 + s * 80)];
+  } else if (t < 0.5) {
+    const s = (t - 0.25) / 0.25;
+    return [Math.round(58 - s * 25), Math.round(86 + s * 80), Math.round(164 - s * 20)];
+  } else if (t < 0.75) {
+    const s = (t - 0.5) / 0.25;
+    return [Math.round(33 + s * 100), Math.round(166 + s * 30), Math.round(144 - s * 80)];
+  } else {
+    const s = (t - 0.75) / 0.25;
+    return [Math.round(133 + s * 120), Math.round(196 + s * 50), Math.round(64 - s * 40)];
+  }
+}
+
 function updateDotVisibility() {
   document.querySelectorAll(".type-dot").forEach(d => d.style.opacity = colorMode === "type" ? "" : "0");
   document.querySelectorAll(".corpus-dot").forEach(d => d.style.opacity = colorMode === "corpus" ? "" : "0");
+  // Show/hide date legend
+  const dl = document.getElementById("date-legend");
+  if (dl) dl.style.display = colorMode === "date" ? "flex" : "none";
 }
 
 function setupCorpusToggle() {
@@ -678,9 +731,16 @@ function draw() {
 
     if (sx < -10 || sx > W + 10 || sy < -10 || sy > H + 10) continue;
 
-    const col = metaLoaded
-      ? (colorMode === "corpus" ? getCorpusColor(m?.c) : getTypeColor(m?.tp))
-      : (darkMode ? [77, 153, 255] : [40, 100, 200]);
+    let col;
+    if (!metaLoaded) {
+      col = darkMode ? [77, 153, 255] : [40, 100, 200];
+    } else if (colorMode === "corpus") {
+      col = getCorpusColor(m?.c);
+    } else if (colorMode === "date") {
+      col = dateColor(parseYear(m?.d));
+    } else {
+      col = getTypeColor(m?.tp);
+    }
     const isHovered = i === hoveredIdx;
     const isPinned = i === pinnedIdx;
     const isSearched = searchHighlight.has(i);
@@ -1084,6 +1144,9 @@ function drawPin() {
   ctx.font = "12px -apple-system, sans-serif";
   ctx.fillText("Your painting", sx + 14, sy + 4);
 }
+
+function zoomIn() { zoom *= 1.5; draw(); }
+function zoomOut() { zoom /= 1.5; draw(); }
 
 function resetView() {
   centerView();
