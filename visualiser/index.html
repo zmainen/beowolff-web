@@ -211,6 +211,7 @@ let activeTypes = new Set();
 let activeCorpora = new Set();
 let hoveredIdx = -1;
 let pinnedIdx = -1;
+let searchHighlight = new Set();
 
 const CORPUS_DOT_CSS = {
   rijksmuseum: "#4d99ff", wikiart: "#ff8033", met: "#33e680", nga: "#e64dB3",
@@ -759,8 +760,6 @@ document.addEventListener("keydown", (e) => {
 // Search
 const searchInput = document.getElementById("search");
 const searchResults = document.getElementById("search-results");
-let searchHighlight = new Set();
-
 searchInput.addEventListener("input", () => {
   const q = searchInput.value.toLowerCase().trim();
   searchResults.innerHTML = "";
