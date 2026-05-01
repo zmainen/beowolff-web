@@ -148,8 +148,11 @@ body { background: #0a0a0f; color: #e0e0e0; font-family: -apple-system, BlinkMac
   <div class="count" id="count"></div>
   <input type="text" id="search" placeholder="Search artist…" autocomplete="off">
   <div id="search-results"></div>
-  <div class="help-link" onclick="toggleHelp()">What am I looking at?</div>
-  <div class="help-link"><a href="/visualiser/how-it-sees.html" style="color:#4a9eff; text-decoration:none;">How the machine sees art →</a></div>
+  <div style="display:flex; gap:12px; margin-top:8px;">
+    <div class="help-link" onclick="resetView()">Reset view</div>
+    <div class="help-link" onclick="toggleHelp()">About</div>
+    <div class="help-link"><a href="/visualiser/how-it-sees.html" style="color:#4a9eff; text-decoration:none;">How it works</a></div>
+  </div>
 </div>
 
 <div id="help-panel">
@@ -888,6 +891,10 @@ document.addEventListener("keydown", (e) => {
     clearSearch();
     return;
   }
+  if ((e.key === "r" || e.key === "R") && document.activeElement !== searchInput) {
+    resetView();
+    return;
+  }
   if (searchIndices.length === 0) return;
   if (e.key === "ArrowRight" || e.key === "ArrowDown") {
     e.preventDefault();
@@ -903,7 +910,8 @@ document.addEventListener("keydown", (e) => {
 function navigateToWork(i) {
   cx = coords[i * 2];
   cy = coords[i * 2 + 1];
-  zoom = Math.max(zoom, Math.min(W, H) / 3);
+  // Zoom in enough to see the neighborhood but not so far you lose context
+  zoom = Math.min(Math.max(zoom, Math.min(W, H) / 5), Math.min(W, H) / 2);
   showDetail(i);
   draw();
   // Scroll gallery strip to show current work
@@ -971,8 +979,8 @@ function flyToArtist(indices) {
     if (x < minX) minX = x; if (x > maxX) maxX = x;
     if (y < minY) minY = y; if (y > maxY) maxY = y;
   }
-  const span = Math.max(maxX - minX, maxY - minY, 0.1);
-  zoom = Math.min(W, H) / span * 0.5;
+  const span = Math.max(maxX - minX, maxY - minY, 0.5); // min span prevents crazy zoom
+  zoom = Math.min(Math.min(W, H) / span * 0.4, Math.min(W, H) / 3); // cap max zoom
 
   searchHighlight = new Set(indices);
   // Store ordered indices for arrow-key navigation (prefer ones with images first)
@@ -1006,12 +1014,8 @@ function flyToArtist(indices) {
     img.src = m.ik.replace(/!\d+,\d+/, "!128,128");
     img.title = m.t || "Untitled";
     img.onclick = () => {
-      // Fly to this specific work
-      cx = coords[i*2];
-      cy = coords[i*2+1];
-      zoom = Math.min(W, H) / 2;
-      showDetail(i);
-      draw();
+      searchCursor = searchIndices.indexOf(i);
+      navigateToWork(i);
     };
     strip.appendChild(img);
     shown++;
@@ -1079,6 +1083,13 @@ function drawPin() {
   ctx.fillStyle = "#fff";
   ctx.font = "12px -apple-system, sans-serif";
   ctx.fillText("Your painting", sx + 14, sy + 4);
+}
+
+function resetView() {
+  centerView();
+  clearSearch();
+  closeDetail();
+  draw();
 }
 
 function toggleHelp() {
