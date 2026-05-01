@@ -417,16 +417,21 @@ function setupColorMode() {
   btnType.className = "ctrl-btn active";
   btnType.id = "btn-color-type";
   btnType.innerHTML = '<span class="toggle"></span>Color by medium';
-  btnType.onclick = () => { colorMode = "type"; btnType.classList.add("active"); btnCorpus.classList.remove("active"); draw(); };
+  btnType.onclick = () => { colorMode = "type"; btnType.classList.add("active"); btnCorpus.classList.remove("active"); updateDotVisibility(); draw(); };
 
   const btnCorpus = document.createElement("div");
   btnCorpus.className = "ctrl-btn";
   btnCorpus.id = "btn-color-corpus";
   btnCorpus.innerHTML = '<span class="toggle"></span>Color by collection';
-  btnCorpus.onclick = () => { colorMode = "corpus"; btnCorpus.classList.add("active"); btnType.classList.remove("active"); draw(); };
+  btnCorpus.onclick = () => { colorMode = "corpus"; btnCorpus.classList.add("active"); btnType.classList.remove("active"); updateDotVisibility(); draw(); };
 
   container.appendChild(btnType);
   container.appendChild(btnCorpus);
+}
+
+function updateDotVisibility() {
+  document.querySelectorAll(".type-dot").forEach(d => d.style.opacity = colorMode === "type" ? "" : "0");
+  document.querySelectorAll(".corpus-dot").forEach(d => d.style.opacity = colorMode === "corpus" ? "" : "0");
 }
 
 function setupCorpusToggle() {
@@ -436,7 +441,7 @@ function setupCorpusToggle() {
     const btn = document.createElement("div");
     btn.className = "ctrl-btn active";
     const k = count >= 1000 ? `${(count/1000).toFixed(0)}k` : count;
-    btn.innerHTML = `<span class="toggle"></span><span class="dot" style="background:${CORPUS_DOT_CSS[corpus] || '#888'}"></span>${corpus} (${k})`;
+    btn.innerHTML = `<span class="toggle"></span><span class="dot corpus-dot" style="background:${CORPUS_DOT_CSS[corpus] || '#888'}"></span>${corpus} (${k})`;
     btn.onclick = () => {
       if (activeCorpora.has(corpus)) { activeCorpora.delete(corpus); btn.classList.remove("active"); }
       else { activeCorpora.add(corpus); btn.classList.add("active"); }
@@ -456,7 +461,7 @@ function setupFilters() {
     btn.className = activeTypes.has(tp) ? "ctrl-btn active" : "ctrl-btn";
     btn.dataset.type = tp;
     const k = count >= 1000 ? `${(count/1000).toFixed(0)}k` : count;
-    btn.innerHTML = `<span class="toggle"></span><span class="dot" style="background:${TYPE_CSS[tp] || '#888'}"></span>${tp} (${k})`;
+    btn.innerHTML = `<span class="toggle"></span><span class="dot type-dot" style="background:${TYPE_CSS[tp] || '#888'}"></span>${tp} (${k})`;
     btn.onclick = () => {
       if (activeTypes.has(tp)) {
         activeTypes.delete(tp);
