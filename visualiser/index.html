@@ -295,9 +295,20 @@ async function load() {
   centerView();
 
   // Set up controls
-  const allTypes = Object.keys(manifest.types || {});
+  // Merge "painting" and "paintings" in type counts
+  const types = manifest.types || {};
+  if (types["painting"] && types["paintings"]) {
+    types["paintings"] += types["painting"];
+    delete types["painting"];
+  } else if (types["painting"]) {
+    types["paintings"] = types["painting"];
+    delete types["painting"];
+  }
+  const allTypes = Object.keys(types);
   const defaultOff = new Set(manifest.default_off || []);
   activeTypes = new Set(allTypes.filter(t => !defaultOff.has(t)));
+  // Also add "painting" to active if "paintings" is active (for matching)
+  if (activeTypes.has("paintings")) activeTypes.add("painting");
   activeCorpora = new Set(Object.keys(manifest.corpora || {}));
   setupCorpusToggle();
   setupFilters();
@@ -391,8 +402,15 @@ function setupFilters() {
     const k = count >= 1000 ? `${(count/1000).toFixed(0)}k` : count;
     btn.innerHTML = `<span class="toggle"></span><span class="dot" style="background:${TYPE_CSS[tp] || '#888'}"></span>${tp} (${k})`;
     btn.onclick = () => {
-      if (activeTypes.has(tp)) { activeTypes.delete(tp); btn.classList.remove("active"); }
-      else { activeTypes.add(tp); btn.classList.add("active"); }
+      if (activeTypes.has(tp)) {
+        activeTypes.delete(tp);
+        if (tp === "paintings") activeTypes.delete("painting");
+        btn.classList.remove("active");
+      } else {
+        activeTypes.add(tp);
+        if (tp === "paintings") activeTypes.add("painting");
+        btn.classList.add("active");
+      }
       draw();
     };
     container.appendChild(btn);
@@ -581,15 +599,16 @@ function showTooltip(i, mx, my) {
   tipExtra.textContent = [m.d, m.m, m.c].filter(Boolean).join(" · ");
 
   if (m.ik && m.ik.startsWith("http")) {
-    // Use tiny thumbnail for hover (fast load)
-    const smallUrl = m.ik.replace("!256,256", "!64,64").replace("!512,512", "!64,64");
-    if (smallUrl !== tipImgLoading) {
-      tipImgLoading = smallUrl;
-      tipImg.src = smallUrl;
-      tipImg.style.display = "block";
-    }
+    const smallUrl = m.ik.replace(/!\d+,\d+/, "!48,48");
+    // Hide previous image immediately while new one loads
+    tipImg.style.opacity = "0.3";
+    tipImg.src = smallUrl;
+    tipImg.style.display = "block";
+    tipImg.onload = () => { tipImg.style.opacity = "1"; };
+    tipImgLoading = smallUrl;
   } else {
     tipImg.style.display = "none";
+    tipImgLoading = "";
   }
 
   // Position: offset from cursor, keep on screen
