@@ -26,7 +26,7 @@ body { background: #0a0a0f; color: #e0e0e0; font-family: -apple-system, BlinkMac
   border-radius: 8px; overflow: hidden; max-width: 260px;
   backdrop-filter: blur(12px); box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 }
-#tooltip img { width: 100%; max-height: 180px; object-fit: contain; background: #111; display: block; }
+#tooltip img { width: 100%; max-height: 120px; object-fit: contain; background: #111; display: block; }
 #tooltip .meta { padding: 8px 12px; }
 #tooltip .title { font-size: 13px; font-weight: 600; color: #fff; }
 #tooltip .artist { font-size: 12px; color: #aaa; margin-top: 2px; }
@@ -580,11 +580,15 @@ function showTooltip(i, mx, my) {
   tipArtist.textContent = m.a || "";
   tipExtra.textContent = [m.d, m.m, m.c].filter(Boolean).join(" · ");
 
-  if (m.ik && m.ik.startsWith("http") && m.ik !== tipImgLoading) {
-    tipImgLoading = m.ik;
-    tipImg.src = m.ik;
-    tipImg.style.display = "block";
-  } else if (!m.ik || !m.ik.startsWith("http")) {
+  if (m.ik && m.ik.startsWith("http")) {
+    // Use tiny thumbnail for hover (fast load)
+    const smallUrl = m.ik.replace("!256,256", "!64,64").replace("!512,512", "!64,64");
+    if (smallUrl !== tipImgLoading) {
+      tipImgLoading = smallUrl;
+      tipImg.src = smallUrl;
+      tipImg.style.display = "block";
+    }
+  } else {
     tipImg.style.display = "none";
   }
 
