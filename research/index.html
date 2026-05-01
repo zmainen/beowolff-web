@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Research — Rasa</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@300;400;500&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #1a1a1a;
+  --white: #faf9f6;
+  --green: #3a9e6e;
+  --green-light: #e0f4eb;
+  --green-pale: #f0faf5;
+  --pool: #2fa8cc;
+  --coral: #e8573a;
+  --sun: #f0c040;
+  --border: #d4d0c8;
+  --muted: #6b6b6b;
+  --link: #1a6b8a;
+  --code-bg: #f5f4ee;
+  --line: #111;
+  --sans: 'Space Grotesk', system-ui, sans-serif;
+  --serif: 'Crimson Pro', Georgia, serif;
+  --mono: 'IBM Plex Mono', monospace;
+  --display: 'Instrument Serif', Georgia, serif;
+  --sidebar-w: 280px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 17px; }
+body { font-family: var(--serif); color: var(--black); background: var(--white); display: flex; min-height: 100vh; }
+
+nav {
+  width: var(--sidebar-w); min-width: var(--sidebar-w);
+  background: var(--green-pale);
+  border-right: 3px solid var(--line);
+  padding: 0;
+  position: fixed; top: 0; left: 0; height: 100vh;
+  overflow-y: auto; z-index: 10;
+  display: flex; flex-direction: column;
+}
+nav .nav-header {
+  padding: 1.5rem 1.25rem 1rem;
+  border-bottom: 3px solid var(--line);
+}
+nav .back {
+  display: inline-block;
+  font-family: var(--mono); font-size: 0.65rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); text-decoration: none;
+  margin-bottom: 0.75rem;
+}
+nav .back:hover { color: var(--green); }
+nav h1 {
+  font-family: var(--display); font-size: 1.5rem;
+  font-weight: 400; line-height: 1.15;
+  margin-bottom: 0.2rem;
+}
+nav .subtitle {
+  font-family: var(--mono); font-size: 0.65rem;
+  color: var(--muted); letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+nav .accent-bar { height: 5px; background: var(--green); }
+nav .nav-body {
+  padding: 1rem 1.25rem;
+  flex: 1; overflow-y: auto;
+}
+nav .nav-section {
+  font-family: var(--mono);
+  font-size: 0.6rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--muted);
+  margin-top: 1.25rem; margin-bottom: 0.4rem;
+  padding-left: 0.5rem;
+}
+nav .nav-section:first-child { margin-top: 0; }
+nav ol { list-style: none; }
+nav ol li { margin-bottom: 0.1rem; }
+nav ol li a {
+  display: block; padding: 0.35rem 0.5rem;
+  font-family: var(--sans); font-size: 0.8rem; font-weight: 500;
+  color: var(--black); text-decoration: none;
+  border-radius: 4px; line-height: 1.35;
+  transition: background 0.15s;
+}
+nav ol li a:hover { background: rgba(58,158,110,0.12); }
+nav ol li a.active { background: var(--green); color: #fff; }
+nav .nav-footer {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--border);
+  font-family: var(--mono); font-size: 0.65rem;
+  color: var(--muted); line-height: 1.6;
+}
+nav .nav-footer a { color: var(--link); text-decoration: none; }
+nav .nav-footer a:hover { color: var(--green); }
+
+main {
+  margin-left: var(--sidebar-w); flex: 1;
+  max-width: 52rem; padding: 3rem 3.5rem 6rem;
+}
+main h1 {
+  font-family: var(--display); font-size: 2.2rem;
+  font-weight: 400; margin-bottom: 0.5rem;
+  line-height: 1.15; color: var(--black);
+}
+main h2 {
+  font-family: var(--display); font-size: 1.6rem;
+  font-weight: 400; margin-top: 2.5rem;
+  margin-bottom: 0.75rem; line-height: 1.25;
+}
+main h3 {
+  font-family: var(--sans); font-size: 1.05rem;
+  font-weight: 600; margin-top: 2rem; margin-bottom: 0.5rem;
+}
+main h4 {
+  font-family: var(--sans); font-size: 0.95rem;
+  font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.4rem;
+}
+main p { margin-bottom: 1rem; line-height: 1.8; font-weight: 300; font-size: 1.02rem; }
+main strong { font-weight: 600; }
+main em { font-style: italic; }
+main ul, main ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+main li { margin-bottom: 0.4rem; line-height: 1.7; font-weight: 300; }
+main blockquote {
+  border-left: 4px solid var(--green);
+  padding: 0.75rem 1.25rem; margin: 1.25rem 0;
+  background: var(--green-pale);
+}
+main blockquote p { margin-bottom: 0.5rem; }
+main blockquote p:last-child { margin-bottom: 0; }
+main code {
+  font-family: var(--mono); font-size: 0.85em;
+  background: var(--code-bg); padding: 0.15em 0.35em;
+  border-radius: 3px;
+}
+main pre {
+  background: var(--code-bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 1rem 1.25rem;
+  overflow-x: auto; margin-bottom: 1.25rem; line-height: 1.5;
+}
+main pre code { background: none; padding: 0; font-size: 0.82rem; }
+main a { color: var(--link); }
+main a:hover { color: var(--green); }
+main table { border-collapse: collapse; width: 100%; margin-bottom: 1.25rem; font-size: 0.9rem; }
+main th, main td {
+  border: 1px solid var(--border); padding: 0.5rem 0.75rem;
+  text-align: left; line-height: 1.5;
+}
+main th { background: var(--code-bg); font-family: var(--sans); font-weight: 600; font-size: 0.82rem; }
+main td { font-weight: 300; }
+main hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+main .article-nav {
+  display: flex; justify-content: space-between;
+  margin-top: 3rem; padding-top: 1.5rem;
+  border-top: 3px solid var(--line);
+  font-size: 0.85rem;
+}
+main .article-nav a {
+  color: var(--link); text-decoration: none;
+  font-family: var(--sans); font-weight: 500;
+}
+main .article-nav a:hover { color: var(--green); }
+
+@media print {
+  nav { display: none; }
+  main { margin-left: 0; max-width: 100%; padding: 1rem; }
+  main .article-nav { display: none; }
+}
+@media (max-width: 800px) {
+  nav { position: static; width: 100%; min-width: 0; height: auto; border-right: none; border-bottom: 3px solid var(--line); }
+  nav .nav-body { max-height: 50vh; }
+  main { margin-left: 0; padding: 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-header">
+    <a class="back" href="../">&larr; Rasa</a>
+    <h1>Research</h1>
+    <div class="subtitle">Landscape and Related Work</div>
+  </div>
+  <div class="accent-bar"></div>
+  <div class="nav-body" id="toc"></div>
+  <div class="nav-footer">
+    <a href="#" onclick="printCurrent(); return false;">Print current</a><br>
+    Zachary F. Mainen, 2026
+  </div>
+</nav>
+
+<main id="content">
+  <p style="color:var(--muted); margin-top: 4rem; text-align:center; font-family: var(--sans);">Select an article from the sidebar.</p>
+</main>
+
+<script>
+const entries = [
+  { section: 'Artsy' },
+  { file: 'articles/01-art-genome-project.md', title: 'The Art Genome Project', subtitle: '1,031 genes, 17 families, and the genomer process', key: '1' },
+  { file: 'articles/02-visual-qualities.md', title: 'Visual Qualities: A Perceptual Vocabulary', subtitle: '74 genes for what art looks like', key: '2' },
+  { file: 'articles/03-metaphysics-schema.md', title: 'The Metaphysics Schema', subtitle: 'How a marketplace models art', key: '3' },
+  { file: 'articles/04-six-ways-similar.md', title: 'Six Ways to Be Similar', subtitle: 'Layered recommendation architecture', key: '4' },
+  { file: 'articles/05-open-source-landscape.md', title: 'The Open-Source Landscape', subtitle: '298 repos — what is published, what is not', key: '5' },
+  { file: 'articles/06-implications-for-rasa.md', title: 'Implications for Rasa', subtitle: 'Top-down genome meets bottom-up embedding', key: '6' },
+  { file: 'articles/07-quantum-next-gen.md', title: 'Quantum: Prototyping the Next-Generation Stack', subtitle: 'CLIP embeddings, LLM ranking, vector search', key: '7' },
+];
+
+const articles = entries.filter(e => e.file);
+const toc = document.getElementById('toc');
+const content = document.getElementById('content');
+let currentIdx = -1;
+
+let articleIdx = 0;
+entries.forEach(e => {
+  if (e.section) {
+    const div = document.createElement('div');
+    div.className = 'nav-section';
+    div.textContent = e.section;
+    toc.appendChild(div);
+    const ol = document.createElement('ol');
+    toc.appendChild(ol);
+  } else {
+    const lists = toc.querySelectorAll('ol');
+    const ol = lists[lists.length - 1];
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    const idx = articleIdx;
+    a.href = '#' + e.key;
+    a.innerHTML = e.title + '<br><span style="font-size:0.7rem;color:var(--muted);font-weight:300;">' + e.subtitle + '</span>';
+    a.dataset.idx = idx;
+    a.onclick = (ev) => { ev.preventDefault(); loadArticle(idx); };
+    li.appendChild(a);
+    ol.appendChild(li);
+    articleIdx++;
+  }
+});
+
+function slugify(text) {
+  return text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+}
+
+function addAnchors(html) {
+  return html.replace(/<(h[1-4])>(.*?)<\/\1>/g, (m, tag, text) => {
+    const id = slugify(text.replace(/<[^>]+>/g, ''));
+    return `<${tag} id="${id}">${text}</${tag}>`;
+  });
+}
+
+async function loadArticle(idx, scrollTo) {
+  currentIdx = idx;
+  const a = articles[idx];
+  toc.querySelectorAll('a').forEach(el => el.classList.toggle('active', parseInt(el.dataset.idx) === idx));
+  try {
+    const resp = await fetch(a.file);
+    if (!resp.ok) { content.innerHTML = `<h1>${a.title}</h1><p style="color:var(--muted);">Not yet available.</p>`; return; }
+    const md = await resp.text();
+    let html = marked.parse(md);
+    html = addAnchors(html);
+    const prev = idx > 0 ? `<a href="#" onclick="loadArticle(${idx-1}); return false;">&larr; ${articles[idx-1].title}</a>` : '<span></span>';
+    const next = idx < articles.length - 1 ? `<a href="#" onclick="loadArticle(${idx+1}); return false;">${articles[idx+1].title} &rarr;</a>` : '<span></span>';
+    html += `<div class="article-nav">${prev}${next}</div>`;
+    content.innerHTML = html;
+    if (scrollTo) { const el = document.getElementById(scrollTo); if (el) { el.scrollIntoView({ behavior: 'smooth' }); return; } }
+    window.scrollTo(0, 0);
+    history.pushState(null, '', '#' + a.key);
+  } catch(e) { content.innerHTML = `<h1>${a.title}</h1><p style="color:var(--muted);">Error loading.</p>`; }
+}
+
+function printCurrent() { if (currentIdx >= 0) window.print(); }
+
+content.addEventListener('click', (e) => {
+  const a = e.target.closest('a');
+  if (!a) return;
+  const href = a.getAttribute('href');
+  if (!href || !href.startsWith('#')) return;
+  const parts = href.slice(1).split('/');
+  const key = parts[0];
+  const idx = articles.findIndex(p => p.key === key);
+  if (idx >= 0) { e.preventDefault(); loadArticle(idx, parts[1]); }
+});
+
+function navigateFromHash() {
+  const h = window.location.hash.slice(1);
+  if (!h) return;
+  const parts = h.split('/');
+  const idx = articles.findIndex(a => a.key === parts[0]);
+  if (idx >= 0 && idx !== currentIdx) loadArticle(idx, parts[1]);
+}
+if (window.location.hash) {
+  navigateFromHash();
+} else {
+  loadArticle(0);
+}
+window.addEventListener('hashchange', navigateFromHash);
+</script>
+</body>
+</html>

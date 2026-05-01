@@ -87,6 +87,7 @@ header .tagline {
 .cell-reader { background: var(--sun-light); }
 .cell-whitepapers { background: var(--pool-light); }
 .cell-visualiser { background: var(--coral-light); }
+.cell-research { background: var(--green-light); }
 
 /* Colored top bar — Mondrian accent */
 .cell::before {
@@ -100,6 +101,7 @@ header .tagline {
 .cell-reader::before { background: var(--sun); }
 .cell-whitepapers::before { background: var(--pool); }
 .cell-visualiser::before { background: var(--coral); }
+.cell-research::before { background: var(--green); }
 
 .cell h2 {
   font-family: var(--serif);
@@ -325,6 +327,48 @@ footer a:hover { color: var(--pool); }
     <span class="enter-link" style="opacity: 0.4; cursor: default; border-style: dashed;">Coming Soon</span>
   </div>
 
+</div>
+
+<!-- Accent divider -->
+<div class="mondrian-accent">
+  <div class="accent-block" style="flex: 0.5; background: var(--green);"></div>
+  <div class="accent-block" style="flex: 1.2; background: var(--white);"></div>
+  <div class="accent-block" style="flex: 0.8; background: var(--pool);"></div>
+  <div class="accent-block" style="flex: 1.5; background: var(--green);"></div>
+  <div class="accent-block" style="flex: 0.3; background: var(--violet);"></div>
+</div>
+
+<!-- RESEARCH ROW -->
+<div class="mondrian" style="grid-template-columns: 1fr;">
+  <div class="cell cell-research" style="border-right: none;">
+    <h2>Research</h2>
+    <p class="cell-desc">
+      Landscape analysis and related work. How existing platforms model art data, compute similarity, and where the open questions are.
+    </p>
+    <ul>
+      <li>
+        <a href="research/#1">The Art Genome Project</a>
+        <span class="label">1,031 genes, 17 families</span>
+      </li>
+      <li>
+        <a href="research/#2">Visual Qualities: A Perceptual Vocabulary</a>
+        <span class="label">74 genes for what art looks like</span>
+      </li>
+      <li>
+        <a href="research/#4">Six Ways to Be Similar</a>
+        <span class="label">Layered recommendation architecture</span>
+      </li>
+      <li>
+        <a href="research/#7">Quantum: Prototyping the Next-Gen Stack</a>
+        <span class="label">CLIP, LLMs, vector search</span>
+      </li>
+      <li>
+        <a href="research/#6">Implications for Rasa</a>
+        <span class="label">Top-down genome meets bottom-up embedding</span>
+      </li>
+    </ul>
+    <a href="research/" class="enter-link">Open Research &rarr;</a>
+  </div>
 </div>
 
 <!-- Bottom accent -->
