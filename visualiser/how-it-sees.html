@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beowolff — How the Machine Sees Art</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0a0a0f; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.7; }
+
+.container { max-width: 800px; margin: 0 auto; padding: 40px 24px 80px; }
+
+h1 { font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.subtitle { font-size: 15px; color: #888; margin-bottom: 40px; }
+
+h2 { font-size: 20px; font-weight: 600; color: #4a9eff; margin-top: 48px; margin-bottom: 16px;
+     text-transform: uppercase; letter-spacing: 1px; font-size: 13px; }
+
+p { color: #bbb; margin-bottom: 16px; font-size: 15px; }
+strong { color: #fff; }
+
+.network-diagram {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; padding: 24px; margin: 24px 0; position: relative;
+}
+.network-diagram h3 { font-size: 16px; color: #fff; margin-bottom: 16px; }
+
+.pipeline {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  justify-content: center; margin: 16px 0;
+}
+.stage {
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px; padding: 12px 16px; text-align: center; min-width: 100px;
+}
+.stage .label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+.stage .value { font-size: 14px; color: #fff; margin-top: 4px; }
+.stage.input { border-color: #4a9eff; }
+.stage.process { border-color: #33e680; }
+.stage.output { border-color: #e64d4d; }
+.arrow { color: #555; font-size: 20px; }
+
+.feature-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px; margin: 16px 0;
+}
+.feature-card {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; padding: 12px; text-align: center;
+}
+.feature-card .name { font-size: 12px; color: #4a9eff; margin-bottom: 4px; }
+.feature-card .desc { font-size: 11px; color: #888; }
+.feature-card .bar {
+  height: 4px; border-radius: 2px; background: rgba(255,255,255,0.1);
+  margin-top: 8px; position: relative;
+}
+.feature-card .bar-fill {
+  height: 100%; border-radius: 2px; position: absolute; left: 0; top: 0;
+  transition: width 1s ease;
+}
+
+.comparison {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 24px 0;
+}
+.comparison-col {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; padding: 20px;
+}
+.comparison-col h3 { font-size: 15px; color: #fff; margin-bottom: 8px; }
+.comparison-col .tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; display: inline-block; margin-bottom: 12px; }
+.tag-semantic { background: rgba(74,158,255,0.2); color: #4a9eff; }
+.tag-aesthetic { background: rgba(51,230,128,0.2); color: #33e680; }
+
+.example-img {
+  width: 100%; border-radius: 8px; margin: 16px 0; background: #111;
+  aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center;
+  color: #444; font-size: 13px; border: 1px solid rgba(255,255,255,0.1);
+}
+
+.dimension-list { list-style: none; padding: 0; }
+.dimension-list li {
+  display: flex; align-items: center; gap: 8px; padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px;
+}
+.dimension-list .dim-num { color: #555; font-size: 11px; min-width: 24px; }
+.dimension-list .dim-name { color: #fff; flex: 1; }
+.dimension-list .dim-desc { color: #777; font-size: 12px; }
+
+.cta {
+  text-align: center; margin-top: 48px; padding: 32px;
+  background: rgba(74,158,255,0.05); border: 1px solid rgba(74,158,255,0.2);
+  border-radius: 12px;
+}
+.cta a {
+  display: inline-block; background: #4a9eff; color: #fff; padding: 10px 24px;
+  border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;
+}
+.cta a:hover { background: #3a8eef; }
+.cta p { color: #888; margin-top: 8px; font-size: 13px; }
+
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+  background: rgba(10,10,15,0.9); backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255,255,255,0.1); padding: 12px 24px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.nav a { color: #4a9eff; text-decoration: none; font-size: 13px; }
+.nav .brand { color: #fff; font-weight: 600; font-size: 14px; }
+
+@media (max-width: 640px) {
+  .comparison { grid-template-columns: 1fr; }
+  .pipeline { flex-direction: column; }
+  .arrow { transform: rotate(90deg); }
+}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <span class="brand">Beowolff</span>
+  <a href="/visualiser/">← Back to Explorer</a>
+</div>
+
+<div class="container" style="margin-top: 48px;">
+
+<h1>How the Machine Sees Art</h1>
+<p class="subtitle">Two neural networks, two ways of understanding a painting</p>
+
+<p>The Art Explorer maps nearly 690,000 artworks into a two-dimensional landscape where similar works land near each other. But what does "similar" mean? The answer depends on which network is doing the looking.</p>
+
+<p>We use two complementary approaches — one that understands <strong>what a work depicts and what tradition it belongs to</strong>, and one that understands <strong>how a work feels</strong>. Together, they capture something closer to the full dimensionality of aesthetic experience.</p>
+
+<h2>Semantic Vision — SigLIP</h2>
+
+<div class="network-diagram">
+  <h3>How SigLIP processes an image</h3>
+  <div class="pipeline">
+    <div class="stage input">
+      <div class="label">Input</div>
+      <div class="value">Painting</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="stage process">
+      <div class="label">Step 1</div>
+      <div class="value">Divide into<br>16×16 patches</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="stage process">
+      <div class="label">Step 2</div>
+      <div class="value">Transformer<br>12 layers</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="stage output">
+      <div class="label">Output</div>
+      <div class="value">768 numbers</div>
+    </div>
+  </div>
+</div>
+
+<p><strong>SigLIP</strong> (Google, 2023) is a vision-language model trained on billions of image-text pairs from the web. It learned to encode both what things look like and what they mean by predicting which captions go with which images.</p>
+
+<p>The network divides each painting into a grid of 16×16 pixel patches — like a mosaic — and processes them through 12 layers of a Vision Transformer. Early layers detect edges, textures, and color patterns. Middle layers recognize objects, faces, and spatial relationships. Late layers encode high-level concepts: "a portrait," "an interior scene," "Impressionist brushwork."</p>
+
+<p>The output is a single vector of <strong>768 numbers</strong> — a point in a 768-dimensional space. The magic is that this space is structured: paintings near each other in this space share semantic properties. A Vermeer interior and a Hopper interior are neighbors because both are "dimly lit rooms with solitary figures" — even though the paint handling, palette, and century are completely different.</p>
+
+<p>This is why the SigLIP projection in the Explorer shows <strong>distinct continents</strong> for different media and traditions. Prints cluster separately from paintings because they look different AND they're described differently in the billions of web pages the model trained on.</p>
+
+<h2>Aesthetic Vision — Iigaya</h2>
+
+<div class="network-diagram">
+  <h3>How the Iigaya model processes an image</h3>
+  <div class="pipeline">
+    <div class="stage input">
+      <div class="label">Input</div>
+      <div class="value">Painting</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="stage process">
+      <div class="label">8 features</div>
+      <div class="value">Image<br>processing</div>
+    </div>
+    <div class="arrow">+</div>
+    <div class="stage process">
+      <div class="label">5 features</div>
+      <div class="value">CLIP binary<br>classifiers</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="stage output">
+      <div class="label">Output</div>
+      <div class="value">13 numbers</div>
+    </div>
+  </div>
+</div>
+
+<p>The <strong>Iigaya model</strong> (Nature Human Behaviour, 2021) takes a fundamentally different approach. Instead of learning representations from data, it extracts 13 hand-designed features that correspond to measurable dimensions of aesthetic preference — properties that neuroscience research has shown predict how much people like a visual image.</p>
+
+<div class="feature-grid">
+  <div class="feature-card">
+    <div class="name">Hue Contrast</div>
+    <div class="desc">How varied the colors are</div>
+    <div class="bar"><div class="bar-fill" style="width:70%; background:#e64d4d;"></div></div>
+  </div>
+  <div class="feature-card">
+    <div class="name">Brightness</div>
+    <div class="desc">Light-dark contrast range</div>
+    <div class="bar"><div class="bar-fill" style="width:45%; background:#ffcc33;"></div></div>
+  </div>
+  <div class="feature-card">
+    <div class="name">Sharpness</div>
+    <div class="desc">Edge definition and detail</div>
+    <div class="bar"><div class="bar-fill" style="width:85%; background:#33e680;"></div></div>
+  </div>
+  <div class="feature-card">
+    <div class="name">Composition</div>
+    <div class="desc">Largest visual segment</div>
+    <div class="bar"><div class="bar-fill" style="width:30%; background:#4a9eff;"></div></div>
+  </div>
+  <div class="feature-card">
+    <div class="name">Saturation</div>
+    <div class="desc">Color intensity depth</div>
+    <div class="bar"><div class="bar-fill" style="width:55%; background:#e64dB3;"></div></div>
+  </div>
+  <div class="feature-card">
+    <div class="name">Focus Contrast</div>
+    <div class="desc">Sharp vs blurred regions</div>
+    <div class="bar"><div class="bar-fill" style="width:40%; background:#ff8033;"></div></div>
+  </div>
+  <div class="feature-card">
+    <div class="name">Balance</div>
+    <div class="desc">Vertical weight distribution</div>
+    <div class="bar"><div class="bar-fill" style="width:50%; background:#9966ff;"></div></div>
+  </div>
+  <div class="feature-card">
+    <div class="name">Aspect Ratio</div>
+    <div class="desc">Shape of the canvas</div>
+    <div class="bar"><div class="bar-fill" style="width:88%; background:#4a9eff;"></div></div>
+  </div>
+  <div class="feature-card">
+    <div class="name">Person Presence</div>
+    <div class="desc">People in the image?</div>
+    <div class="bar"><div class="bar-fill" style="width:25%; background:#e64d4d;"></div></div>
+  </div>
+  <div class="feature-card">
+    <div class="name">Concreteness</div>
+    <div class="desc">Realistic vs abstract</div>
+    <div class="bar"><div class="bar-fill" style="width:60%; background:#33e680;"></div></div>
+  </div>
+  <div class="feature-card">
+    <div class="name">Dynamics</div>
+    <div class="desc">Movement and energy</div>
+    <div class="bar"><div class="bar-fill" style="width:35%; background:#ffcc33;"></div></div>
+  </div>
+  <div class="feature-card">
+    <div class="name">Temperature</div>
+    <div class="desc">Warm reds vs cool blues</div>
+    <div class="bar"><div class="bar-fill" style="width:20%; background:#ff8033;"></div></div>
+  </div>
+  <div class="feature-card">
+    <div class="name">Valence</div>
+    <div class="desc">Emotional tone: joy vs melancholy</div>
+    <div class="bar"><div class="bar-fill" style="width:75%; background:#9966ff;"></div></div>
+  </div>
+</div>
+
+<p>The first eight features are computed directly from the pixels — no neural network needed. The last five use CLIP (a predecessor of SigLIP) as a binary classifier: "does this image contain people or not?", "is this concrete or abstract?", "is this dynamic or static?"</p>
+
+<p>The key insight from the Iigaya research: <strong>individual aesthetic preferences decompose into weighted combinations of these 13 features</strong>. People don't just "like" or "dislike" a painting — they respond to specific perceptual dimensions, and those responses are measurable and predictable. The same features that organize visual processing in the human brain predict aesthetic preference in behavioral experiments.</p>
+
+<h2>What Each One Misses</h2>
+
+<div class="comparison">
+  <div class="comparison-col">
+    <h3>SigLIP sees</h3>
+    <span class="tag tag-semantic">768 dimensions</span>
+    <ul class="dimension-list">
+      <li><div class="dim-name">What it depicts</div></li>
+      <li><div class="dim-name">Art-historical tradition</div></li>
+      <li><div class="dim-name">Medium and technique</div></li>
+      <li><div class="dim-name">Cultural context</div></li>
+      <li><div class="dim-name">Compositional structure</div></li>
+    </ul>
+    <p style="margin-top:12px; font-size:12px; color:#666;"><strong style="color:#e64d4d;">Misses:</strong> the visceral — whether a painting is warm or cool, calm or agitated, heavy or light. Two paintings of the same subject in the same style can feel completely different.</p>
+  </div>
+  <div class="comparison-col">
+    <h3>Iigaya sees</h3>
+    <span class="tag tag-aesthetic">13 dimensions</span>
+    <ul class="dimension-list">
+      <li><div class="dim-name">Color harmony</div></li>
+      <li><div class="dim-name">Visual weight and balance</div></li>
+      <li><div class="dim-name">Energy and movement</div></li>
+      <li><div class="dim-name">Emotional temperature</div></li>
+      <li><div class="dim-name">Perceptual complexity</div></li>
+    </ul>
+    <p style="margin-top:12px; font-size:12px; color:#666;"><strong style="color:#e64d4d;">Misses:</strong> the semantic — what the painting is of, who painted it, what tradition it belongs to. A Vermeer and a Hopper might score identically.</p>
+  </div>
+</div>
+
+<p>This is why the Explorer offers both projections. <strong>Switch between them</strong> and the same collection reorganizes around different axes of similarity. In the semantic view, all portraits cluster together. In the aesthetic view, dark moody portraits cluster with dark moody landscapes — because they share the same perceptual character regardless of what they depict.</p>
+
+<h2>What Comes Next</h2>
+
+<p>The Beowolff-Embed program proposes to build a <strong>single unified embedding</strong> that fuses both approaches — and adds three more signals: structured curatorial metadata (artist, period, school, medium), narrative biography (the artist's story, from Wikipedia and catalogs), and collector behavior (what people buy, save, and spend time looking at).</p>
+
+<p>Five signals in one space. The embedding that results would understand not just what a painting looks like and how it feels, but what tradition it belongs to, who made it, and who will love it. That is the recommendation engine Artsy doesn't have — and the foundation of what Beowolff is building.</p>
+
+<div class="cta">
+  <a href="/visualiser/">Explore the Collection →</a>
+  <p>690,000 works. Two ways of seeing. Pan, zoom, search, discover.</p>
+</div>
+
+</div>
+</body>
+</html>
