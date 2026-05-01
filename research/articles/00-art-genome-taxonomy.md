@@ -1,3 +1,5 @@
+<!-- GENERATED — do not edit. SSOT: haak/home/commons/datasets/art-genome/taxonomy.md -->
+
 # The Art Genome Project — Gene Taxonomy
 
 1,378 genes organized into 17 families. Each gene can be applied to an artwork with a relevance score from 1 to 100. Source: Artsy (CC-BY-4.0). Last upstream update: October 2018.
