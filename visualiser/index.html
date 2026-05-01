@@ -265,6 +265,11 @@ let hoveredIdx = -1;
 let pinnedIdx = -1;
 let searchHighlight = new Set();
 
+// Sprite sheets for thumbnail rendering
+let spriteSheets = [];  // array of Image objects
+let spriteMap = null;    // [{s, u, v}] per work
+let spritesReady = false;
+
 const CORPUS_COLORS = {
   rijksmuseum: [77, 153, 255],
   wikiart: [255, 128, 51],
@@ -415,6 +420,9 @@ async function loadMetadata() {
 
   buildArtistIndex();
   draw();
+
+  // Load sprites in background (v2 enhancement)
+  loadSprites();
 
   // Load Iigaya coords in background
   loadIigayaCoords();
@@ -801,13 +809,36 @@ function draw() {
       ctx.fill();
     }
 
+    // Draw as sprite thumbnail if available and large enough, otherwise dot
+    const drawSize = Math.max(2, size);
+    if (spritesReady && spriteMap[i] && drawSize >= 3 && !dimmed) {
+      const sp = spriteMap[i];
+      const sheet = spriteSheets[sp.s];
+      if (sheet) {
+        const renderSize = Math.max(drawSize, 4);
+        ctx.globalAlpha = alpha;
+        ctx.drawImage(sheet, sp.u, sp.v, 8, 8, sx - renderSize/2, sy - renderSize/2, renderSize, renderSize);
+        ctx.globalAlpha = 1;
+        // Draw highlight ring for hovered/pinned/searched
+        if (isHovered || isPinned) {
+          ctx.strokeStyle = "#fff";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(sx - renderSize/2 - 1, sy - renderSize/2 - 1, renderSize + 2, renderSize + 2);
+        } else if (isSearched) {
+          ctx.strokeStyle = "#4a9eff";
+          ctx.lineWidth = 1;
+          ctx.strokeRect(sx - renderSize/2, sy - renderSize/2, renderSize, renderSize);
+        }
+        continue;
+      }
+    }
+
     ctx.fillStyle = `rgba(${col[0]},${col[1]},${col[2]},${alpha})`;
     if (size > 3 || isHovered || isPinned || isSearched) {
       ctx.beginPath();
       ctx.arc(sx, sy, size / 2, 0, Math.PI * 2);
       ctx.fill();
     } else {
-      // Tiny points: use fillRect for performance, but round size
       const s = Math.max(1, Math.round(size));
       ctx.fillRect(sx, sy, s, s);
     }
@@ -1186,6 +1217,37 @@ function drawPin() {
   ctx.fillStyle = "#fff";
   ctx.font = "12px -apple-system, sans-serif";
   ctx.fillText("Your painting", sx + 14, sy + 4);
+}
+
+async function loadSprites() {
+  try {
+    // Try loading sprite map from v2
+    const mapResp = await fetch(`${SOS}/visualiser/v2/sprite_map.json`);
+    if (!mapResp.ok) return; // sprites not built yet
+    spriteMap = await mapResp.json();
+
+    // Figure out how many sheets exist
+    const nSheets = Math.max(...spriteMap.map(m => m.s)) + 1;
+    console.log("Loading %d sprite sheets...", nSheets);
+
+    for (let i = 0; i < nSheets; i++) {
+      const img = new window.Image();
+      img.crossOrigin = "anonymous";
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = `${SOS}/visualiser/v2/sprite_${String(i).padStart(3, "0")}.jpg`;
+      });
+      spriteSheets.push(img);
+      console.log("Sheet %d loaded", i);
+    }
+
+    spritesReady = true;
+    console.log("Sprites ready!");
+    draw();
+  } catch(e) {
+    console.log("Sprites not available:", e);
+  }
 }
 
 function zoomIn() { zoom *= 1.5; draw(); }
