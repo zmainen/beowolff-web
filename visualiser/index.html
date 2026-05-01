@@ -294,7 +294,7 @@ async function load() {
 
   centerView();
 
-  // Set up controls and render dots immediately (before metadata loads)
+  // Set up controls
   const allTypes = Object.keys(manifest.types || {});
   const defaultOff = new Set(manifest.default_off || []);
   activeTypes = new Set(allTypes.filter(t => !defaultOff.has(t)));
@@ -303,28 +303,37 @@ async function load() {
   setupFilters();
   setupProjectionToggle();
   setupLandmarks();
-  buildGrid();
 
   document.getElementById("count").textContent = `${N.toLocaleString()} works`;
   document.getElementById("loading").style.display = "none";
 
-  // Initial draw — dots only, no metadata yet (hover/click won't work until loaded)
+  // First draw — show dots immediately
   draw();
 
-  // Stream metadata chunks in background without blocking UI
+  // Build grid after first paint
+  requestAnimationFrame(() => {
+    buildGrid();
+
+    // Stream metadata in background
+    loadMetadata();
+  });
+}
+
+async function loadMetadata() {
+  const fill = document.getElementById("load-fill");
   const chunks = manifest.chunks || [];
   for (let i = 0; i < chunks.length; i++) {
     const resp = await fetch(`${BASE}/${chunks[i]}`);
     const text = await resp.text();
-    // Parse in a microtask to avoid blocking
     await new Promise(resolve => {
       setTimeout(() => {
         const chunk = JSON.parse(text);
         meta.push(...chunk);
-        fill.style.width = (40 + 55 * (i + 1) / chunks.length) + "%";
         resolve();
       }, 0);
     });
+    // Redraw after each chunk so filters start working progressively
+    if (i % 3 === 2) draw();
   }
 
   buildArtistIndex();
