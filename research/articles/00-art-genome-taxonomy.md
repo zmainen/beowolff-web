@@ -1,4 +1,4 @@
-<!-- GENERATED — do not edit. SSOT: haak/home/commons/datasets/art-genome/taxonomy.md -->
+<!-- GENERATED — do not edit. SSOT: /Users/zach/Projects/haak/home/commons/datasets/art-genome/taxonomy.md -->
 
 # The Art Genome Project — Gene Taxonomy
 
